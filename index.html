@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Mensile Followers</title>
+<link rel="icon" href="favicon.ico">
+    <!-- Libreria per leggere i file Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #004282; /* Blu istituzionale */
+            --secondary-color: #ffd400; /* Giallo istituzionale */
+            --background-color: #f4f7fa;
+            --text-color: #333333;
+            --card-background: #ffffff;
+            --border-color: #e0e0e0;
+            --font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 5px solid var(--secondary-color);
+        }
+
+        header h1 {
+            font-weight: 600;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .file-upload-wrapper {
+            margin: 1.5rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .file-input-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .file-input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+
+        button, select {
+            font-family: var(--font-family);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-align: center;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            display: block;
+            width: 100%;
+            max-width: 250px;
+            margin: 1rem auto 0;
+        }
+
+        button:hover {
+            background-color: #003366; /* Blu più scuro */
+        }
+        
+        button:disabled {
+            background-color: #a0b4c8;
+            cursor: not-allowed;
+        }
+
+        .navigation-bar {
+            background-color: var(--card-background);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navigation-bar label {
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            color: var(--text-color);
+        }
+
+        .report-section {
+            padding: 2rem;
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .data-item {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            position: relative;
+        }
+
+        .data-item h3 {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .data-item p {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        th, td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        thead th {
+            background-color: #f1f1f1;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            padding: 0;
+        }
+        .copy-button:hover {
+            background-color: var(--secondary-color);
+        }
+        .copy-button svg {
+            width: 16px;
+            height: 16px;
+            fill: #333;
+        }
+        .copy-button.table-copy {
+            position: static;
+            display: inline-flex;
+            margin-left: 1rem;
+            vertical-align: middle;
+        }
+
+        .table-wrapper {
+            position: relative;
+        }
+        .table-wrapper > h2, .table-wrapper > h3 {
+            display: inline-block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+            header {
+                padding: 1rem;
+            }
+            .file-upload-wrapper {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .navigation-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            select {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Report Mensile Followers</h1>
+    </header>
+
+    <main>
+        <div id="upload-container" class="card">
+            <h2>Caricamento File</h2>
+            <p>Carica i report per generare l'analisi.</p>
+            <div class="file-upload-wrapper">
+                <div class="file-input-group">
+                    <label for="file-report1">1. Report Emplifi (Fans Globale)</label>
+                    <input type="file" id="file-report1" accept=".xlsx">
+                </div>
+                <div class="file-input-group">
+                    <label for="file-report2">2. Report LinkedIn (Competitor Analytics)</label>
+                    <input type="file" id="file-report2" accept=".xlsx">
+                </div>
+            </div>
+            <button id="process-button">Genera Report</button>
+        </div>
+
+        <div id="results-container" class="hidden">
+            <div class="navigation-bar">
+                <label for="section-selector">Visualizza Sezione:</label>
+                <select id="section-selector">
+                    <option value="sintesi-gruppo">Sintesi dati di Gruppo</option>
+                    <option value="benchmark-fb">Benchmark Facebook</option>
+                    <option value="benchmark-x">Benchmark X</option>
+                    <option value="benchmark-linkedin">Benchmark Linkedin</option>
+                    <option value="benchmark-ig">Benchmark Instagram</option>
+                </select>
+            </div>
+
+            <div id="sections-wrapper">
+                <!-- Sezioni generate da JavaScript -->
+                <section id="sintesi-gruppo" class="report-section"></section>
+                <section id="benchmark-fb" class="report-section hidden"></section>
+                <section id="benchmark-x" class="report-section hidden"></section>
+                <section id="benchmark-linkedin" class="report-section hidden"></section>
+                <section id="benchmark-ig" class="report-section hidden"></section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // Elementi DOM
+        const processButton = document.getElementById('process-button');
+        const fileInput1 = document.getElementById('file-report1');
+        const fileInput2 = document.getElementById('file-report2');
+        const uploadContainer = document.getElementById('upload-container');
+        const resultsContainer = document.getElementById('results-container');
+        const sectionSelector = document.getElementById('section-selector');
+        const sectionsWrapper = document.getElementById('sections-wrapper');
+
+        // Mappe per la sostituzione dei nomi
+        const fbNameMap = { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'Dhl Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'Ho Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' };
+        const xNameMap = { 'Royal Mail (https://twitter.com/RoyalMail)': 'Royal Mail', 'Poste Italiane (https://twitter.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa_IT (https://twitter.com/Frecciarossa_IT)': 'Frecciarossa', 'PosteSpedizioni (https://twitter.com/PosteSpedizioni)': 'PosteSpedizioni', 'eni (https://twitter.com/eni)': 'Eni', 'WebPoste (https://twitter.com/WebPoste)': 'WebPoste', 'Deutsche Post und DHL News (https://twitter.com/DeutschePostDHL)': 'Deutsche Post', 'UniCredit Italia (https://twitter.com/UniCredit_IT)': 'UniCredit', 'Enel Group (https://twitter.com/EnelGroupIT)': 'Enel', 'Intesa Sanpaolo (https://twitter.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Banca MPS (https://twitter.com/Banca_MPS)': 'Banca MPS' };
+        const liNameMap = { 'Poste Italiane': 'Poste Italiane', 'Intesa Sanpaolo': 'Intesa Sanpaolo', 'Eni': 'Eni', 'Trenitalia': 'Trenitalia', 'INPS_official': 'Inps', 'CDP Cassa Depositi e Prestiti': 'Cassa Depositi e Prestiti', 'BNL BNP Paribas': 'BNL BNP Paribas', 'UniCredit': 'UniCredit', 'Enel Group': 'Enel', 'Gruppo Ferrovie dello Stato Italiane': 'Gruppo FS' };
+        const igNameMap = { 'Vodafone It (https://instagram.com/vodafoneit)': 'Vodafone', 'TIM (https://instagram.com/timofficial)': 'Tim', 'Royal Mail 📮 (https://instagram.com/royalmailofficial)': 'Royal Mail', 'Poste Italiane (https://instagram.com/posteitaliane)': 'Poste Italiane', 'WINDTRE (https://instagram.com/windtre)': 'Wind Tre', 'Intesa Sanpaolo (https://instagram.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Eni (https://instagram.com/eni)': 'Eni', 'Enel Group (https://instagram.com/enelgroup)': 'Enel', 'DHL Express Italy (https://instagram.com/dhlexpressitaly)': 'Dhl Italia', 'Postepay (https://instagram.com/postepay)': 'Postepay', 'Banca Monte dei Paschi di Siena (https://instagram.com/banca_mps)': 'Banca MPS' };
+
+        // --- FUNZIONI HELPER ---
+        const formatNumberK_M = (num) => {
+            if (num >= 1000000) return `${(num / 1000000).toFixed(2).replace(/\.00$/, '').replace(/\.([1-9])0$/, '.$1')}M`;
+            if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+            return num.toString();
+        };
+
+        const createCopyButton = (isTable = false) => {
+            const btnClass = isTable ? 'copy-button table-copy' : 'copy-button';
+            return `<button class="${btnClass}" title="Copia"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>`;
+        };
+        
+        const showFeedbackOnButton = (button, message, originalText) => {
+            button.textContent = message;
+            setTimeout(() => {
+                button.textContent = originalText;
+            }, 1500);
+        };
+
+        const showFeedbackOnCopyButton = (button, message) => {
+            const originalContent = button.innerHTML;
+            button.innerHTML = `<span style="font-size: 12px; font-weight: 600;">${message}</span>`;
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+            }, 1500);
+        };
+
+        /**
+         * **NUOVA FUNZIONE POTENZIATA**
+         * Trova un foglio di lavoro in modo flessibile, ignorando maiuscole/minuscole e spazi.
+         */
+        const findSheetFuzzy = (workbook, targetName) => {
+            const normalizedTarget = targetName.toLowerCase().trim();
+            const sheetName = workbook.SheetNames.find(name => name.toLowerCase().trim() === normalizedTarget);
+            return sheetName ? workbook.Sheets[sheetName] : null;
+        };
+
+        // --- FUNZIONI DI RENDER ---
+
+        const renderSintesi = (summarySheet, growthSheet) => {
+            const totalFollowers = summarySheet['A13'] ? summarySheet['A13'].v : 0;
+            const prevMonthFollowers = summarySheet['B13'] ? summarySheet['B13'].v : 0;
+            const variation = totalFollowers - prevMonthFollowers;
+            const relativeVariation = summarySheet['C13'] ? summarySheet['C13'].w : 'N/D';
+
+            let trendData = [];
+            if (growthSheet) {
+                 const growthData = XLSX.utils.sheet_to_json(growthSheet, { header: 1, range: "A13:B43", defval: null });
+                 trendData = growthData
+                    .filter(row => row.length >= 2 && row[0] !== null && row[1] !== null)
+                    .map(row => ({
+                        col1: row[0],
+                        col2: typeof row[1] === 'number' ? row[1].toLocaleString('it-IT') : row[1]
+                    }));
+            }
+           
+            const html = `
+                <h2>Sintesi dati di Gruppo</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        ${createCopyButton()}
+                        <h3>Totale iscritti ai canali</h3>
+                        <p data-copy-target>${formatNumberK_M(totalFollowers)}</p>
+                    </div>
+                    <div class="data-item">
+                        ${createCopyButton()}
+                        <h3>Variazione vs mese precedente</h3>
+                        <p data-copy-target>${variation > 0 ? '+' : ''}${variation.toLocaleString('it-IT')}</p>
+                    </div>
+                    <div class="data-item">
+                        ${createCopyButton()}
+                        <h3>Variazione relativa vs mese precedente</h3>
+                        <p data-copy-target>${relativeVariation}</p>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <h3>Andamento crescita ultimo mese ${createCopyButton(true)}</h3>
+                    <table data-copy-target>
+                        <thead><tr><th>Data</th><th>Followers</th></tr></thead>
+                        <tbody>
+                            ${trendData.map(row => `<tr><td>${row.col1}</td><td>${row.col2}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('sintesi-gruppo').innerHTML = html;
+        };
+
+        const renderBenchmark = (sheet, range, nameMap, elementId, title) => {
+            const data = XLSX.utils.sheet_to_json(sheet, { header: 1, range: range, defval: null });
+            const processedData = data
+                .filter(row => row.length >= 2 && row[0] !== null && typeof row[1] === 'number')
+                .map(row => ({
+                    page: nameMap[row[0].trim()] || row[0].trim(),
+                    followers: row[1]
+                }))
+                .sort((a, b) => b.followers - a.followers);
+
+            const html = `
+                <div class="table-wrapper">
+                    <h2>${title} ${createCopyButton(true)}</h2>
+                    <table data-copy-target>
+                        <thead><tr><th>Pagina</th><th>Followers</th></tr></thead>
+                        <tbody>
+                            ${processedData.map(row => `<tr><td>${row.page}</td><td>${row.followers.toLocaleString('it-IT')}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById(elementId).innerHTML = html;
+        };
+
+        // --- GESTORI EVENTI ---
+        processButton.addEventListener('click', () => {
+            if (!fileInput1.files[0] || !fileInput2.files[0]) {
+                alert('Per favore, carica entrambi i file Excel.');
+                return;
+            }
+            
+            const originalButtonText = processButton.textContent;
+            processButton.textContent = "Caricamento...";
+            processButton.disabled = true;
+
+            const reader1 = new FileReader();
+            const reader2 = new FileReader();
+
+            const promise1 = new Promise((resolve, reject) => {
+                reader1.onload = (e) => resolve(new Uint8Array(e.target.result));
+                reader1.onerror = (e) => reject(new Error("Errore lettura file 1"));
+                reader1.readAsArrayBuffer(fileInput1.files[0]);
+            });
+
+            const promise2 = new Promise((resolve, reject) => {
+                reader2.onload = (e) => resolve(new Uint8Array(e.target.result));
+                reader2.onerror = (e) => reject(new Error("Errore lettura file 2"));
+                reader2.readAsArrayBuffer(fileInput2.files[0]);
+            });
+
+            Promise.all([promise1, promise2]).then(([data1, data2]) => {
+                let workbook1, workbook2;
+                try {
+                    workbook1 = XLSX.read(data1, { type: 'array' });
+                    workbook2 = XLSX.read(data2, { type: 'array' });
+
+                    const sheetsToFind1 = {
+                        summarySheet: 'Total community size',
+                        growthSheet: 'Fans Poste Crescita',
+                        fbSheet: 'FB Followers',
+                        xSheet: 'X Followers',
+                        igSheet: 'IG followers' // Rimuovo lo spazio extra, la ricerca flessibile lo gestirà
+                    };
+                    const sheetsToFind2 = {
+                        liSheet: 'COMPETITORS'
+                    };
+
+                    let foundSheets = {};
+                    let missingSheets = [];
+
+                    for (const [key, name] of Object.entries(sheetsToFind1)) {
+                        foundSheets[key] = findSheetFuzzy(workbook1, name);
+                        if (!foundSheets[key]) missingSheets.push(name);
+                    }
+                    for (const [key, name] of Object.entries(sheetsToFind2)) {
+                        foundSheets[key] = findSheetFuzzy(workbook2, name);
+                        if (!foundSheets[key]) missingSheets.push(`${name} (dal file 2)`);
+                    }
+
+                    if (missingSheets.length > 0) {
+                        const availableSheets1 = workbook1.SheetNames.join(', ');
+                        const availableSheets2 = workbook2.SheetNames.join(', ');
+                        throw new Error(
+                            `I seguenti fogli non sono stati trovati: [${missingSheets.join(', ')}].\n\n`+
+                            `Fogli disponibili nel file 1: [${availableSheets1}]\n`+
+                            `Fogli disponibili nel file 2: [${availableSheets2}]`
+                        );
+                    }
+
+                    renderSintesi(foundSheets.summarySheet, foundSheets.growthSheet);
+                    renderBenchmark(foundSheets.fbSheet, 'A16:B36', fbNameMap, 'benchmark-fb', 'Benchmark Facebook');
+                    renderBenchmark(foundSheets.liSheet, 'A3:B12', liNameMap, 'benchmark-linkedin', 'Benchmark Linkedin');
+                    renderBenchmark(foundSheets.xSheet, 'A16:B26', xNameMap, 'benchmark-x', 'Benchmark X');
+                    renderBenchmark(foundSheets.igSheet, 'A16:B26', igNameMap, 'benchmark-ig', 'Benchmark Instagram');
+
+                    uploadContainer.classList.add('hidden');
+                    resultsContainer.classList.remove('hidden');
+                    sectionSelector.value = 'sintesi-gruppo';
+                    document.querySelectorAll('.report-section').forEach(s => s.classList.add('hidden'));
+                    document.getElementById('sintesi-gruppo').classList.remove('hidden');
+                    
+                    showFeedbackOnButton(processButton, 'Fatto!', originalButtonText);
+
+                } catch (error) {
+                    console.error("Errore durante l'elaborazione dei file:", error);
+                    alert(`Si è verificato un errore:\n\n${error.message}`);
+                    showFeedbackOnButton(processButton, 'Errore!', originalButtonText);
+                } finally {
+                    processButton.disabled = false;
+                }
+            });
+        });
+
+        sectionSelector.addEventListener('change', (e) => {
+            document.querySelectorAll('.report-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            const activeSection = document.getElementById(e.target.value);
+            if (activeSection) {
+                activeSection.classList.remove('hidden');
+            }
+        });
+
+        sectionsWrapper.addEventListener('click', (e) => {
+            const copyBtn = e.target.closest('.copy-button');
+            if (!copyBtn) return;
+            const parentWrapper = copyBtn.closest('.data-item, .table-wrapper');
+            if (!parentWrapper) return;
+            const target = parentWrapper.querySelector('[data-copy-target]');
+            if (!target) return;
+            let textToCopy = '';
+            if (target.tagName === 'TABLE') {
+                const rows = target.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('th, td');
+                    const rowText = Array.from(cells).map(cell => cell.innerText.trim()).join('\t');
+                    textToCopy += rowText + '\n';
+                });
+            } else {
+                textToCopy = target.innerText.trim();
+            }
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showFeedbackOnCopyButton(copyBtn, 'OK!');
+            }).catch(err => {
+                console.error('Errore durante la copia:', err);
+                showFeedbackOnCopyButton(copyBtn, 'Err');
+            });
+        });
+    });
+    </script>
+</body>
+</html>
