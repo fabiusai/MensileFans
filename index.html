@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Mensile Followers</title>
-<link rel="icon" href="favicon.ico">
     <!-- Libreria per leggere i file Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -337,6 +336,15 @@
             return num.toString();
         };
 
+        const convertExcelDate = (excelDate) => {
+            if (typeof excelDate !== 'number' || excelDate < 1) return excelDate;
+            const date = new Date((excelDate - 25569) * 86400 * 1000);
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const year = date.getUTCFullYear();
+            return `${day}/${month}/${year}`;
+        };
+
         const createCopyButton = (isTable = false) => {
             const btnClass = isTable ? 'copy-button table-copy' : 'copy-button';
             return `<button class="${btnClass}" title="Copia"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>`;
@@ -356,11 +364,7 @@
                 button.innerHTML = originalContent;
             }, 1500);
         };
-
-        /**
-         * **NUOVA FUNZIONE POTENZIATA**
-         * Trova un foglio di lavoro in modo flessibile, ignorando maiuscole/minuscole e spazi.
-         */
+        
         const findSheetFuzzy = (workbook, targetName) => {
             const normalizedTarget = targetName.toLowerCase().trim();
             const sheetName = workbook.SheetNames.find(name => name.toLowerCase().trim() === normalizedTarget);
@@ -377,13 +381,17 @@
 
             let trendData = [];
             if (growthSheet) {
-                 const growthData = XLSX.utils.sheet_to_json(growthSheet, { header: 1, range: "A13:B43", defval: null });
-                 trendData = growthData
+                const growthData = XLSX.utils.sheet_to_json(growthSheet, { header: 1, range: "A13:B43", defval: null });
+                trendData = growthData
                     .filter(row => row.length >= 2 && row[0] !== null && row[1] !== null)
-                    .map(row => ({
-                        col1: row[0],
-                        col2: typeof row[1] === 'number' ? row[1].toLocaleString('it-IT') : row[1]
-                    }));
+                    .map(row => {
+                        // **CORREZIONE**: Tenta di convertire la colonna 2 in un numero per formattarla
+                        const followerCount = parseFloat(row[1]);
+                        return {
+                            col1: typeof row[0] === 'number' ? convertExcelDate(row[0]) : row[0],
+                            col2: !isNaN(followerCount) ? followerCount.toLocaleString('it-IT') : row[1]
+                        };
+                    });
             }
            
             const html = `
@@ -420,12 +428,18 @@
 
         const renderBenchmark = (sheet, range, nameMap, elementId, title) => {
             const data = XLSX.utils.sheet_to_json(sheet, { header: 1, range: range, defval: null });
+            
+            // **CORREZIONE**: Logica di elaborazione più robusta
             const processedData = data
-                .filter(row => row.length >= 2 && row[0] !== null && typeof row[1] === 'number')
-                .map(row => ({
-                    page: nameMap[row[0].trim()] || row[0].trim(),
-                    followers: row[1]
-                }))
+                .map(row => {
+                    // Tenta di convertire la colonna dei follower in un numero
+                    const followers = (row && row.length >= 2) ? parseFloat(row[1]) : NaN;
+                    return {
+                        page: (row && row.length > 0 && row[0] !== null) ? (nameMap[row[0].trim()] || row[0].trim()) : '',
+                        followers: followers
+                    };
+                })
+                .filter(item => item.page && !isNaN(item.followers)) // Filtra solo le righe valide
                 .sort((a, b) => b.followers - a.followers);
 
             const html = `
@@ -479,7 +493,7 @@
                         growthSheet: 'Fans Poste Crescita',
                         fbSheet: 'FB Followers',
                         xSheet: 'X Followers',
-                        igSheet: 'IG followers' // Rimuovo lo spazio extra, la ricerca flessibile lo gestirà
+                        igSheet: 'IG followers'
                     };
                     const sheetsToFind2 = {
                         liSheet: 'COMPETITORS'
