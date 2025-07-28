@@ -92,7 +92,7 @@
             background-color: #fafafa;
         }
 
-        button, select {
+        button {
             font-family: var(--font-family);
             font-size: 1rem;
             font-weight: 600;
@@ -104,7 +104,7 @@
             text-align: center;
         }
 
-        button {
+        #process-button {
             background-color: var(--primary-color);
             color: white;
             display: block;
@@ -113,36 +113,44 @@
             margin: 1rem auto 0;
         }
 
-        button:hover {
+        #process-button:hover {
             background-color: #003366; /* Blu più scuro */
         }
         
-        button:disabled {
+        #process-button:disabled {
             background-color: #a0b4c8;
             cursor: not-allowed;
         }
 
-        .navigation-bar {
-            background-color: var(--card-background);
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 2rem;
+        #section-nav-container {
             display: flex;
-            align-items: center;
-            gap: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
         }
 
-        .navigation-bar label {
+        .nav-button {
+            flex-grow: 1;
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1rem;
             font-weight: 600;
         }
+        
+        .nav-button:hover {
+            background-color: #f0f5fa;
+            border-color: var(--primary-color);
+        }
 
-        select {
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid var(--border-color);
-            background-color: white;
-            color: var(--text-color);
+        .nav-button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
 
         .report-section {
@@ -201,6 +209,10 @@
             font-weight: 600;
         }
 
+        .numeric-cell {
+            text-align: right;
+        }
+
         tbody tr:hover {
             background-color: #f9f9f9;
         }
@@ -243,25 +255,22 @@
             display: inline-block;
         }
 
-        /* Responsive */
+        .tables-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .tables-container {
+                grid-template-columns: 1fr;
+            }
+        }
         @media (max-width: 768px) {
-            main {
-                padding: 1rem;
-            }
-            header {
-                padding: 1rem;
-            }
-            .file-upload-wrapper {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-            .navigation-bar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            select {
-                max-width: 100%;
-            }
+            main { padding: 1rem; }
+            header { padding: 1rem; }
+            .file-upload-wrapper { flex-direction: column; gap: 1.5rem; }
         }
     </style>
 </head>
@@ -289,19 +298,15 @@
         </div>
 
         <div id="results-container" class="hidden">
-            <div class="navigation-bar">
-                <label for="section-selector">Visualizza Sezione:</label>
-                <select id="section-selector">
-                    <option value="sintesi-gruppo">Sintesi dati di Gruppo</option>
-                    <option value="benchmark-fb">Benchmark Facebook</option>
-                    <option value="benchmark-x">Benchmark X</option>
-                    <option value="benchmark-linkedin">Benchmark Linkedin</option>
-                    <option value="benchmark-ig">Benchmark Instagram</option>
-                </select>
+            <div id="section-nav-container">
+                <button class="nav-button active" data-section="sintesi-gruppo">Sintesi dati di Gruppo</button>
+                <button class="nav-button" data-section="benchmark-fb">Benchmark Facebook</button>
+                <button class="nav-button" data-section="benchmark-x">Benchmark X</button>
+                <button class="nav-button" data-section="benchmark-linkedin">Benchmark Linkedin</button>
+                <button class="nav-button" data-section="benchmark-ig">Benchmark Instagram</button>
             </div>
 
             <div id="sections-wrapper">
-                <!-- Sezioni generate da JavaScript -->
                 <section id="sintesi-gruppo" class="report-section"></section>
                 <section id="benchmark-fb" class="report-section hidden"></section>
                 <section id="benchmark-x" class="report-section hidden"></section>
@@ -314,66 +319,27 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
 
-        // Elementi DOM
         const processButton = document.getElementById('process-button');
         const fileInput1 = document.getElementById('file-report1');
         const fileInput2 = document.getElementById('file-report2');
         const uploadContainer = document.getElementById('upload-container');
         const resultsContainer = document.getElementById('results-container');
-        const sectionSelector = document.getElementById('section-selector');
+        const sectionNavContainer = document.getElementById('section-nav-container');
         const sectionsWrapper = document.getElementById('sections-wrapper');
 
-        // Mappe per la sostituzione dei nomi
         const fbNameMap = { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'Dhl Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'Ho Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' };
         const xNameMap = { 'Royal Mail (https://twitter.com/RoyalMail)': 'Royal Mail', 'Poste Italiane (https://twitter.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa_IT (https://twitter.com/Frecciarossa_IT)': 'Frecciarossa', 'PosteSpedizioni (https://twitter.com/PosteSpedizioni)': 'PosteSpedizioni', 'eni (https://twitter.com/eni)': 'Eni', 'WebPoste (https://twitter.com/WebPoste)': 'WebPoste', 'Deutsche Post und DHL News (https://twitter.com/DeutschePostDHL)': 'Deutsche Post', 'UniCredit Italia (https://twitter.com/UniCredit_IT)': 'UniCredit', 'Enel Group (https://twitter.com/EnelGroupIT)': 'Enel', 'Intesa Sanpaolo (https://twitter.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Banca MPS (https://twitter.com/Banca_MPS)': 'Banca MPS' };
         const liNameMap = { 'Poste Italiane': 'Poste Italiane', 'Intesa Sanpaolo': 'Intesa Sanpaolo', 'Eni': 'Eni', 'Trenitalia': 'Trenitalia', 'INPS_official': 'Inps', 'CDP Cassa Depositi e Prestiti': 'Cassa Depositi e Prestiti', 'BNL BNP Paribas': 'BNL BNP Paribas', 'UniCredit': 'UniCredit', 'Enel Group': 'Enel', 'Gruppo Ferrovie dello Stato Italiane': 'Gruppo FS' };
         const igNameMap = { 'Vodafone It (https://instagram.com/vodafoneit)': 'Vodafone', 'TIM (https://instagram.com/timofficial)': 'Tim', 'Royal Mail 📮 (https://instagram.com/royalmailofficial)': 'Royal Mail', 'Poste Italiane (https://instagram.com/posteitaliane)': 'Poste Italiane', 'WINDTRE (https://instagram.com/windtre)': 'Wind Tre', 'Intesa Sanpaolo (https://instagram.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Eni (https://instagram.com/eni)': 'Eni', 'Enel Group (https://instagram.com/enelgroup)': 'Enel', 'DHL Express Italy (https://instagram.com/dhlexpressitaly)': 'Dhl Italia', 'Postepay (https://instagram.com/postepay)': 'Postepay', 'Banca Monte dei Paschi di Siena (https://instagram.com/banca_mps)': 'Banca MPS' };
 
-        // --- FUNZIONI HELPER ---
-        const formatNumberK_M = (num) => {
-            if (num >= 1000000) return `${(num / 1000000).toFixed(2).replace(/\.00$/, '').replace(/\.([1-9])0$/, '.$1')}M`;
-            if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`;
-            return num.toString();
-        };
+        const formatNumberK_M = (num) => { if (num >= 1000000) return `${(num / 1000000).toFixed(2).replace(/\.00$/, '').replace(/\.([1-9])0$/, '.$1')}M`; if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`; return num.toString(); };
+        const convertExcelDate = (excelDate) => { if (typeof excelDate !== 'number' || excelDate < 1) return excelDate; const date = new Date((excelDate - 25569) * 86400 * 1000); const day = String(date.getUTCDate()).padStart(2, '0'); const month = String(date.getUTCMonth() + 1).padStart(2, '0'); const year = date.getUTCFullYear(); return `${day}/${month}/${year}`; };
+        const createCopyButton = (isTable = false) => { const btnClass = isTable ? 'copy-button table-copy' : 'copy-button'; return `<button class="${btnClass}" title="Copia"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>`; };
+        const showFeedbackOnButton = (button, message, originalText) => { button.textContent = message; setTimeout(() => { button.textContent = originalText; }, 1500); };
+        const showFeedbackOnCopyButton = (button, message) => { const originalContent = button.innerHTML; button.innerHTML = `<span style="font-size: 12px; font-weight: 600;">${message}</span>`; setTimeout(() => { button.innerHTML = originalContent; }, 1500); };
+        const findSheetFuzzy = (workbook, targetName) => { const normalizedTarget = targetName.toLowerCase().trim(); const sheetName = workbook.SheetNames.find(name => name.toLowerCase().trim() === normalizedTarget); return sheetName ? workbook.Sheets[sheetName] : null; };
 
-        const convertExcelDate = (excelDate) => {
-            if (typeof excelDate !== 'number' || excelDate < 1) return excelDate;
-            const date = new Date((excelDate - 25569) * 86400 * 1000);
-            const day = String(date.getUTCDate()).padStart(2, '0');
-            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-            const year = date.getUTCFullYear();
-            return `${day}/${month}/${year}`;
-        };
-
-        const createCopyButton = (isTable = false) => {
-            const btnClass = isTable ? 'copy-button table-copy' : 'copy-button';
-            return `<button class="${btnClass}" title="Copia"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>`;
-        };
-        
-        const showFeedbackOnButton = (button, message, originalText) => {
-            button.textContent = message;
-            setTimeout(() => {
-                button.textContent = originalText;
-            }, 1500);
-        };
-
-        const showFeedbackOnCopyButton = (button, message) => {
-            const originalContent = button.innerHTML;
-            button.innerHTML = `<span style="font-size: 12px; font-weight: 600;">${message}</span>`;
-            setTimeout(() => {
-                button.innerHTML = originalContent;
-            }, 1500);
-        };
-        
-        const findSheetFuzzy = (workbook, targetName) => {
-            const normalizedTarget = targetName.toLowerCase().trim();
-            const sheetName = workbook.SheetNames.find(name => name.toLowerCase().trim() === normalizedTarget);
-            return sheetName ? workbook.Sheets[sheetName] : null;
-        };
-
-        // --- FUNZIONI DI RENDER ---
-
-        const renderSintesi = (summarySheet, growthSheet) => {
+        const renderSintesi = (summarySheet, growthSheet, channelSheet) => {
             const totalFollowers = summarySheet['A13'] ? summarySheet['A13'].v : 0;
             const prevMonthFollowers = summarySheet['B13'] ? summarySheet['B13'].v : 0;
             const variation = totalFollowers - prevMonthFollowers;
@@ -383,145 +349,60 @@
             if (growthSheet) {
                 const growthData = XLSX.utils.sheet_to_json(growthSheet, { header: 1, range: "A13:B43", defval: null });
                 trendData = growthData
-                    .filter(row => row.length >= 2 && row[0] !== null && row[1] !== null)
-                    .map(row => {
-                        // **CORREZIONE**: Tenta di convertire la colonna 2 in un numero per formattarla
-                        const followerCount = parseFloat(row[1]);
-                        return {
-                            col1: typeof row[0] === 'number' ? convertExcelDate(row[0]) : row[0],
-                            col2: !isNaN(followerCount) ? followerCount.toLocaleString('it-IT') : row[1]
-                        };
-                    });
+                    .filter(row => row && row.length >= 2 && row[0] !== null && row[1] !== null)
+                    .map(row => ({ col1: typeof row[0] === 'number' ? convertExcelDate(row[0]) : row[0], col2: !isNaN(parseFloat(row[1])) ? parseFloat(row[1]).toLocaleString('it-IT') : row[1] }));
+            }
+            
+            let channelData = [];
+            if (channelSheet) {
+                const rawChannelData = XLSX.utils.sheet_to_json(channelSheet, { header: 1, range: "A13:B17", defval: null });
+                channelData = rawChannelData
+                    .filter(row => row && row.length >= 2 && row[0] !== null && row[1] !== null)
+                    .map(row => ({ canale: row[0], followers: !isNaN(parseFloat(row[1])) ? parseFloat(row[1]).toLocaleString('it-IT') : row[1] }));
             }
            
-            const html = `
-                <h2>Sintesi dati di Gruppo</h2>
-                <div class="data-grid">
-                    <div class="data-item">
-                        ${createCopyButton()}
-                        <h3>Totale iscritti ai canali</h3>
-                        <p data-copy-target>${formatNumberK_M(totalFollowers)}</p>
-                    </div>
-                    <div class="data-item">
-                        ${createCopyButton()}
-                        <h3>Variazione vs mese precedente</h3>
-                        <p data-copy-target>${variation > 0 ? '+' : ''}${variation.toLocaleString('it-IT')}</p>
-                    </div>
-                    <div class="data-item">
-                        ${createCopyButton()}
-                        <h3>Variazione relativa vs mese precedente</h3>
-                        <p data-copy-target>${relativeVariation}</p>
-                    </div>
-                </div>
-                <div class="table-wrapper">
-                    <h3>Andamento crescita ultimo mese ${createCopyButton(true)}</h3>
-                    <table data-copy-target>
-                        <thead><tr><th>Data</th><th>Followers</th></tr></thead>
-                        <tbody>
-                            ${trendData.map(row => `<tr><td>${row.col1}</td><td>${row.col2}</td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            const html = `<h2>Sintesi dati di Gruppo</h2><div class="data-grid"><div class="data-item">${createCopyButton()}<h3>Totale iscritti ai canali</h3><p data-copy-target>${formatNumberK_M(totalFollowers)}</p></div><div class="data-item">${createCopyButton()}<h3>Variazione vs mese precedente</h3><p data-copy-target>${variation > 0 ? '+' : ''}${variation.toLocaleString('it-IT')}</p></div><div class="data-item">${createCopyButton()}<h3>Variazione relativa vs mese precedente</h3><p data-copy-target>${relativeVariation}</p></div></div><div class="tables-container"><div class="table-wrapper"><h3>Andamento crescita ultimo mese ${createCopyButton(true)}</h3><table data-copy-target><thead><tr><th>Data</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${trendData.map(row => `<tr><td>${row.col1}</td><td class="numeric-cell">${row.col2}</td></tr>`).join('')}</tbody></table></div><div class="table-wrapper"><h3>Follower per canale ${createCopyButton(true)}</h3><table data-copy-target><thead><tr><th>Canale</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${channelData.map(row => `<tr><td>${row.canale}</td><td class="numeric-cell">${row.followers}</td></tr>`).join('')}</tbody></table></div></div>`;
             document.getElementById('sintesi-gruppo').innerHTML = html;
         };
 
         const renderBenchmark = (sheet, range, nameMap, elementId, title) => {
             const data = XLSX.utils.sheet_to_json(sheet, { header: 1, range: range, defval: null });
-            
-            // **CORREZIONE**: Logica di elaborazione più robusta
-            const processedData = data
-                .map(row => {
-                    // Tenta di convertire la colonna dei follower in un numero
-                    const followers = (row && row.length >= 2) ? parseFloat(row[1]) : NaN;
-                    return {
-                        page: (row && row.length > 0 && row[0] !== null) ? (nameMap[row[0].trim()] || row[0].trim()) : '',
-                        followers: followers
-                    };
-                })
-                .filter(item => item.page && !isNaN(item.followers)) // Filtra solo le righe valide
-                .sort((a, b) => b.followers - a.followers);
-
-            const html = `
-                <div class="table-wrapper">
-                    <h2>${title} ${createCopyButton(true)}</h2>
-                    <table data-copy-target>
-                        <thead><tr><th>Pagina</th><th>Followers</th></tr></thead>
-                        <tbody>
-                            ${processedData.map(row => `<tr><td>${row.page}</td><td>${row.followers.toLocaleString('it-IT')}</td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            const processedData = data.map(row => ({ page: (row && row.length > 0 && row[0] !== null) ? (nameMap[row[0].trim()] || row[0].trim()) : '', followers: (row && row.length >= 2) ? parseFloat(row[1]) : NaN })).filter(item => item.page && !isNaN(item.followers)).sort((a, b) => b.followers - a.followers);
+            const html = `<div class="table-wrapper"><h2>${title} ${createCopyButton(true)}</h2><table data-copy-target><thead><tr><th>Pagina</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${processedData.map(row => `<tr><td>${row.page}</td><td class="numeric-cell">${row.followers.toLocaleString('it-IT')}</td></tr>`).join('')}</tbody></table></div>`;
             document.getElementById(elementId).innerHTML = html;
         };
 
-        // --- GESTORI EVENTI ---
         processButton.addEventListener('click', () => {
-            if (!fileInput1.files[0] || !fileInput2.files[0]) {
-                alert('Per favore, carica entrambi i file Excel.');
-                return;
-            }
-            
+            if (!fileInput1.files[0] || !fileInput2.files[0]) { alert('Per favore, carica entrambi i file Excel.'); return; }
             const originalButtonText = processButton.textContent;
             processButton.textContent = "Caricamento...";
             processButton.disabled = true;
 
-            const reader1 = new FileReader();
-            const reader2 = new FileReader();
+            // --- LOGICA DI LETTURA FILE CORRETTA E ROBUSTA ---
+            const readFile = (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(new Uint8Array(e.target.result));
+                    reader.onerror = e => reject(new Error(`Errore durante la lettura del file ${file.name}`));
+                    reader.readAsArrayBuffer(file);
+                });
+            };
 
-            const promise1 = new Promise((resolve, reject) => {
-                reader1.onload = (e) => resolve(new Uint8Array(e.target.result));
-                reader1.onerror = (e) => reject(new Error("Errore lettura file 1"));
-                reader1.readAsArrayBuffer(fileInput1.files[0]);
-            });
-
-            const promise2 = new Promise((resolve, reject) => {
-                reader2.onload = (e) => resolve(new Uint8Array(e.target.result));
-                reader2.onerror = (e) => reject(new Error("Errore lettura file 2"));
-                reader2.readAsArrayBuffer(fileInput2.files[0]);
-            });
-
-            Promise.all([promise1, promise2]).then(([data1, data2]) => {
-                let workbook1, workbook2;
+            Promise.all([readFile(fileInput1.files[0]), readFile(fileInput2.files[0])]).then(([data1, data2]) => {
                 try {
-                    workbook1 = XLSX.read(data1, { type: 'array' });
-                    workbook2 = XLSX.read(data2, { type: 'array' });
+                    const workbook1 = XLSX.read(data1, { type: 'array' });
+                    const workbook2 = XLSX.read(data2, { type: 'array' });
 
-                    const sheetsToFind1 = {
-                        summarySheet: 'Total community size',
-                        growthSheet: 'Fans Poste Crescita',
-                        fbSheet: 'FB Followers',
-                        xSheet: 'X Followers',
-                        igSheet: 'IG followers'
-                    };
-                    const sheetsToFind2 = {
-                        liSheet: 'COMPETITORS'
-                    };
+                    const sheetsToFind1 = { summarySheet: 'Total community size', growthSheet: 'Fans Poste Crescita', channelSheet: 'Fans Poste per piattaforma', fbSheet: 'FB Followers', xSheet: 'X Followers', igSheet: 'IG followers' };
+                    const sheetsToFind2 = { liSheet: 'COMPETITORS' };
+                    let foundSheets = {}, missingSheets = [];
 
-                    let foundSheets = {};
-                    let missingSheets = [];
+                    for (const [key, name] of Object.entries(sheetsToFind1)) { if (!(foundSheets[key] = findSheetFuzzy(workbook1, name))) missingSheets.push(name); }
+                    for (const [key, name] of Object.entries(sheetsToFind2)) { if (!(foundSheets[key] = findSheetFuzzy(workbook2, name))) missingSheets.push(`${name} (dal file 2)`); }
 
-                    for (const [key, name] of Object.entries(sheetsToFind1)) {
-                        foundSheets[key] = findSheetFuzzy(workbook1, name);
-                        if (!foundSheets[key]) missingSheets.push(name);
-                    }
-                    for (const [key, name] of Object.entries(sheetsToFind2)) {
-                        foundSheets[key] = findSheetFuzzy(workbook2, name);
-                        if (!foundSheets[key]) missingSheets.push(`${name} (dal file 2)`);
-                    }
+                    if (missingSheets.length > 0) { throw new Error(`I seguenti fogli non sono stati trovati: [${missingSheets.join(', ')}].\n\nFogli disponibili nel file 1: [${workbook1.SheetNames.join(', ')}]\nFogli disponibili nel file 2: [${workbook2.SheetNames.join(', ')}]`); }
 
-                    if (missingSheets.length > 0) {
-                        const availableSheets1 = workbook1.SheetNames.join(', ');
-                        const availableSheets2 = workbook2.SheetNames.join(', ');
-                        throw new Error(
-                            `I seguenti fogli non sono stati trovati: [${missingSheets.join(', ')}].\n\n`+
-                            `Fogli disponibili nel file 1: [${availableSheets1}]\n`+
-                            `Fogli disponibili nel file 2: [${availableSheets2}]`
-                        );
-                    }
-
-                    renderSintesi(foundSheets.summarySheet, foundSheets.growthSheet);
+                    renderSintesi(foundSheets.summarySheet, foundSheets.growthSheet, foundSheets.channelSheet);
                     renderBenchmark(foundSheets.fbSheet, 'A16:B36', fbNameMap, 'benchmark-fb', 'Benchmark Facebook');
                     renderBenchmark(foundSheets.liSheet, 'A3:B12', liNameMap, 'benchmark-linkedin', 'Benchmark Linkedin');
                     renderBenchmark(foundSheets.xSheet, 'A16:B26', xNameMap, 'benchmark-x', 'Benchmark X');
@@ -529,12 +410,14 @@
 
                     uploadContainer.classList.add('hidden');
                     resultsContainer.classList.remove('hidden');
-                    sectionSelector.value = 'sintesi-gruppo';
-                    document.querySelectorAll('.report-section').forEach(s => s.classList.add('hidden'));
+                    
+                    const navButtons = sectionNavContainer.querySelectorAll('.nav-button');
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    sectionNavContainer.querySelector('[data-section="sintesi-gruppo"]').classList.add('active');
+                    document.querySelectorAll('.report-section').forEach(section => section.classList.add('hidden'));
                     document.getElementById('sintesi-gruppo').classList.remove('hidden');
                     
                     showFeedbackOnButton(processButton, 'Fatto!', originalButtonText);
-
                 } catch (error) {
                     console.error("Errore durante l'elaborazione dei file:", error);
                     alert(`Si è verificato un errore:\n\n${error.message}`);
@@ -545,14 +428,13 @@
             });
         });
 
-        sectionSelector.addEventListener('change', (e) => {
-            document.querySelectorAll('.report-section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            const activeSection = document.getElementById(e.target.value);
-            if (activeSection) {
-                activeSection.classList.remove('hidden');
-            }
+        sectionNavContainer.addEventListener('click', (e) => {
+            const clickedButton = e.target.closest('.nav-button');
+            if (!clickedButton) return;
+            const sectionId = clickedButton.dataset.section;
+            sectionNavContainer.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            clickedButton.classList.add('active');
+            document.querySelectorAll('.report-section').forEach(section => section.classList.toggle('hidden', section.id !== sectionId));
         });
 
         sectionsWrapper.addEventListener('click', (e) => {
@@ -565,20 +447,9 @@
             let textToCopy = '';
             if (target.tagName === 'TABLE') {
                 const rows = target.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('th, td');
-                    const rowText = Array.from(cells).map(cell => cell.innerText.trim()).join('\t');
-                    textToCopy += rowText + '\n';
-                });
-            } else {
-                textToCopy = target.innerText.trim();
-            }
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                showFeedbackOnCopyButton(copyBtn, 'OK!');
-            }).catch(err => {
-                console.error('Errore durante la copia:', err);
-                showFeedbackOnCopyButton(copyBtn, 'Err');
-            });
+                rows.forEach(row => { const cells = row.querySelectorAll('th, td'); const rowText = Array.from(cells).map(cell => cell.innerText.trim()).join('\t'); textToCopy += rowText + '\n'; });
+            } else { textToCopy = target.innerText.trim(); }
+            navigator.clipboard.writeText(textToCopy).then(() => { showFeedbackOnCopyButton(copyBtn, 'OK!'); }).catch(err => { console.error('Errore durante la copia:', err); showFeedbackOnCopyButton(copyBtn, 'Err'); });
         });
     });
     </script>
