@@ -327,10 +327,12 @@
         const sectionNavContainer = document.getElementById('section-nav-container');
         const sectionsWrapper = document.getElementById('sections-wrapper');
 
-        const fbNameMap = { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'Dhl Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'Ho Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' };
-        const xNameMap = { 'Royal Mail (https://twitter.com/RoyalMail)': 'Royal Mail', 'Poste Italiane (https://twitter.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa_IT (https://twitter.com/Frecciarossa_IT)': 'Frecciarossa', 'PosteSpedizioni (https://twitter.com/PosteSpedizioni)': 'PosteSpedizioni', 'eni (https://twitter.com/eni)': 'Eni', 'WebPoste (https://twitter.com/WebPoste)': 'WebPoste', 'Deutsche Post und DHL News (https://twitter.com/DeutschePostDHL)': 'Deutsche Post', 'UniCredit Italia (https://twitter.com/UniCredit_IT)': 'UniCredit', 'Enel Group (https://twitter.com/EnelGroupIT)': 'Enel', 'Intesa Sanpaolo (https://twitter.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Banca MPS (https://twitter.com/Banca_MPS)': 'Banca MPS' };
-        const liNameMap = { 'Poste Italiane': 'Poste Italiane', 'Intesa Sanpaolo': 'Intesa Sanpaolo', 'Eni': 'Eni', 'Trenitalia': 'Trenitalia', 'INPS_official': 'Inps', 'CDP Cassa Depositi e Prestiti': 'Cassa Depositi e Prestiti', 'BNL BNP Paribas': 'BNL BNP Paribas', 'UniCredit': 'UniCredit', 'Enel Group': 'Enel', 'Gruppo Ferrovie dello Stato Italiane': 'Gruppo FS' };
-        const igNameMap = { 'Vodafone It (https://instagram.com/vodafoneit)': 'Vodafone', 'TIM (https://instagram.com/timofficial)': 'Tim', 'Royal Mail 📮 (https://instagram.com/royalmailofficial)': 'Royal Mail', 'Poste Italiane (https://instagram.com/posteitaliane)': 'Poste Italiane', 'WINDTRE (https://instagram.com/windtre)': 'Wind Tre', 'Intesa Sanpaolo (https://instagram.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Eni (https://instagram.com/eni)': 'Eni', 'Enel Group (https://instagram.com/enelgroup)': 'Enel', 'DHL Express Italy (https://instagram.com/dhlexpressitaly)': 'Dhl Italia', 'Postepay (https://instagram.com/postepay)': 'Postepay', 'Banca Monte dei Paschi di Siena (https://instagram.com/banca_mps)': 'Banca MPS' };
+        const nameMaps = {
+            fb: { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'Dhl Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'Ho Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' },
+            x: { 'Royal Mail (https://twitter.com/RoyalMail)': 'Royal Mail', 'Poste Italiane (https://twitter.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa_IT (https://twitter.com/Frecciarossa_IT)': 'Frecciarossa', 'PosteSpedizioni (https://twitter.com/PosteSpedizioni)': 'PosteSpedizioni', 'eni (https://twitter.com/eni)': 'Eni', 'WebPoste (https://twitter.com/WebPoste)': 'WebPoste', 'Deutsche Post und DHL News (https://twitter.com/DeutschePostDHL)': 'Deutsche Post', 'UniCredit Italia (https://twitter.com/UniCredit_IT)': 'UniCredit', 'Enel Group (https://twitter.com/EnelGroupIT)': 'Enel', 'Intesa Sanpaolo (https://twitter.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Banca MPS (https://twitter.com/Banca_MPS)': 'Banca MPS' },
+            li: { 'Poste Italiane': 'Poste Italiane', 'Intesa Sanpaolo': 'Intesa Sanpaolo', 'Eni': 'Eni', 'Trenitalia': 'Trenitalia', 'INPS_official': 'Inps', 'CDP Cassa Depositi e Prestiti': 'Cassa Depositi e Prestiti', 'BNL BNP Paribas': 'BNL BNP Paribas', 'UniCredit': 'UniCredit', 'Enel Group': 'Enel', 'Gruppo Ferrovie dello Stato Italiane': 'Gruppo FS' },
+            ig: { 'Vodafone It (https://instagram.com/vodafoneit)': 'Vodafone', 'TIM (https://instagram.com/timofficial)': 'Tim', 'Royal Mail 📮 (https://instagram.com/royalmailofficial)': 'Royal Mail', 'Poste Italiane (https://instagram.com/posteitaliane)': 'Poste Italiane', 'WINDTRE (https://instagram.com/windtre)': 'Wind Tre', 'Intesa Sanpaolo (https://instagram.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Eni (https://instagram.com/eni)': 'Eni', 'Enel Group (https://instagram.com/enelgroup)': 'Enel', 'DHL Express Italy (https://instagram.com/dhlexpressitaly)': 'Dhl Italia', 'Postepay (https://instagram.com/postepay)': 'Postepay', 'Banca Monte dei Paschi di Siena (https://instagram.com/banca_mps)': 'Banca MPS' }
+        };
 
         const formatNumberK_M = (num) => { if (num >= 1000000) return `${(num / 1000000).toFixed(2).replace(/\.00$/, '').replace(/\.([1-9])0$/, '.$1')}M`; if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`; return num.toString(); };
         const convertExcelDate = (excelDate) => { if (typeof excelDate !== 'number' || excelDate < 1) return excelDate; const date = new Date((excelDate - 25569) * 86400 * 1000); const day = String(date.getUTCDate()).padStart(2, '0'); const month = String(date.getUTCMonth() + 1).padStart(2, '0'); const year = date.getUTCFullYear(); return `${day}/${month}/${year}`; };
@@ -350,7 +352,11 @@
                 const growthData = XLSX.utils.sheet_to_json(growthSheet, { header: 1, range: "A13:B43", defval: null });
                 trendData = growthData
                     .filter(row => row && row.length >= 2 && row[0] !== null && row[1] !== null)
-                    .map(row => ({ col1: typeof row[0] === 'number' ? convertExcelDate(row[0]) : row[0], col2: !isNaN(parseFloat(row[1])) ? parseFloat(row[1]).toLocaleString('it-IT') : row[1] }));
+                    .map(row => ({
+                        date: typeof row[0] === 'number' ? convertExcelDate(row[0]) : row[0],
+                        rawValue: parseFloat(row[1]) || 0,
+                        formattedValue: !isNaN(parseFloat(row[1])) ? parseFloat(row[1]).toLocaleString('it-IT') : row[1]
+                    }));
             }
             
             let channelData = [];
@@ -358,17 +364,21 @@
                 const rawChannelData = XLSX.utils.sheet_to_json(channelSheet, { header: 1, range: "A13:B17", defval: null });
                 channelData = rawChannelData
                     .filter(row => row && row.length >= 2 && row[0] !== null && row[1] !== null)
-                    .map(row => ({ canale: row[0], followers: !isNaN(parseFloat(row[1])) ? parseFloat(row[1]).toLocaleString('it-IT') : row[1] }));
+                    .map(row => ({
+                        canale: row[0],
+                        rawValue: parseFloat(row[1]) || 0,
+                        formattedValue: !isNaN(parseFloat(row[1])) ? parseFloat(row[1]).toLocaleString('it-IT') : row[1]
+                    }));
             }
            
-            const html = `<h2>Sintesi dati di Gruppo</h2><div class="data-grid"><div class="data-item">${createCopyButton()}<h3>Totale iscritti ai canali</h3><p data-copy-target>${formatNumberK_M(totalFollowers)}</p></div><div class="data-item">${createCopyButton()}<h3>Variazione vs mese precedente</h3><p data-copy-target>${variation > 0 ? '+' : ''}${variation.toLocaleString('it-IT')}</p></div><div class="data-item">${createCopyButton()}<h3>Variazione relativa vs mese precedente</h3><p data-copy-target>${relativeVariation}</p></div></div><div class="tables-container"><div class="table-wrapper"><h3>Andamento crescita ultimo mese ${createCopyButton(true)}</h3><table data-copy-target><thead><tr><th>Data</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${trendData.map(row => `<tr><td>${row.col1}</td><td class="numeric-cell">${row.col2}</td></tr>`).join('')}</tbody></table></div><div class="table-wrapper"><h3>Follower per canale ${createCopyButton(true)}</h3><table data-copy-target><thead><tr><th>Canale</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${channelData.map(row => `<tr><td>${row.canale}</td><td class="numeric-cell">${row.followers}</td></tr>`).join('')}</tbody></table></div></div>`;
+            const html = `<h2>Sintesi dati di Gruppo</h2><div class="data-grid"><div class="data-item">${createCopyButton()}<h3>Totale iscritti ai canali</h3><p data-copy-target>${formatNumberK_M(totalFollowers)}</p></div><div class="data-item">${createCopyButton()}<h3>Variazione vs mese precedente</h3><p data-copy-target>${variation > 0 ? '+' : ''}${variation.toLocaleString('it-IT')}</p></div><div class="data-item">${createCopyButton()}<h3>Variazione relativa vs mese precedente</h3><p data-copy-target>${relativeVariation}</p></div></div><div class="tables-container"><div class="table-wrapper"><h3>Andamento crescita ultimo mese ${createCopyButton(true)}</h3><table data-copy-target><thead><tr><th>Data</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${trendData.map(row => `<tr><td>${row.date}</td><td class="numeric-cell" data-raw-value="${row.rawValue}">${row.formattedValue}</td></tr>`).join('')}</tbody></table></div><div class="table-wrapper"><h3>Follower per canale ${createCopyButton(true)}</h3><table data-copy-target><thead><tr><th>Canale</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${channelData.map(row => `<tr><td>${row.canale}</td><td class="numeric-cell" data-raw-value="${row.rawValue}">${row.formattedValue}</td></tr>`).join('')}</tbody></table></div></div>`;
             document.getElementById('sintesi-gruppo').innerHTML = html;
         };
 
         const renderBenchmark = (sheet, range, nameMap, elementId, title) => {
             const data = XLSX.utils.sheet_to_json(sheet, { header: 1, range: range, defval: null });
             const processedData = data.map(row => ({ page: (row && row.length > 0 && row[0] !== null) ? (nameMap[row[0].trim()] || row[0].trim()) : '', followers: (row && row.length >= 2) ? parseFloat(row[1]) : NaN })).filter(item => item.page && !isNaN(item.followers)).sort((a, b) => b.followers - a.followers);
-            const html = `<div class="table-wrapper"><h2>${title} ${createCopyButton(true)}</h2><table data-copy-target><thead><tr><th>Pagina</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${processedData.map(row => `<tr><td>${row.page}</td><td class="numeric-cell">${row.followers.toLocaleString('it-IT')}</td></tr>`).join('')}</tbody></table></div>`;
+            const html = `<div class="table-wrapper"><h2>${title} ${createCopyButton(true)}</h2><table data-copy-target><thead><tr><th>Pagina</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${processedData.map(row => `<tr><td>${row.page}</td><td class="numeric-cell" data-raw-value="${row.followers}">${row.followers.toLocaleString('it-IT')}</td></tr>`).join('')}</tbody></table></div>`;
             document.getElementById(elementId).innerHTML = html;
         };
 
@@ -378,15 +388,7 @@
             processButton.textContent = "Caricamento...";
             processButton.disabled = true;
 
-            // --- LOGICA DI LETTURA FILE CORRETTA E ROBUSTA ---
-            const readFile = (file) => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = e => resolve(new Uint8Array(e.target.result));
-                    reader.onerror = e => reject(new Error(`Errore durante la lettura del file ${file.name}`));
-                    reader.readAsArrayBuffer(file);
-                });
-            };
+            const readFile = (file) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = e => resolve(new Uint8Array(e.target.result)); reader.onerror = e => reject(new Error(`Errore durante la lettura del file ${file.name}`)); reader.readAsArrayBuffer(file); });
 
             Promise.all([readFile(fileInput1.files[0]), readFile(fileInput2.files[0])]).then(([data1, data2]) => {
                 try {
@@ -403,16 +405,15 @@
                     if (missingSheets.length > 0) { throw new Error(`I seguenti fogli non sono stati trovati: [${missingSheets.join(', ')}].\n\nFogli disponibili nel file 1: [${workbook1.SheetNames.join(', ')}]\nFogli disponibili nel file 2: [${workbook2.SheetNames.join(', ')}]`); }
 
                     renderSintesi(foundSheets.summarySheet, foundSheets.growthSheet, foundSheets.channelSheet);
-                    renderBenchmark(foundSheets.fbSheet, 'A16:B36', fbNameMap, 'benchmark-fb', 'Benchmark Facebook');
-                    renderBenchmark(foundSheets.liSheet, 'A3:B12', liNameMap, 'benchmark-linkedin', 'Benchmark Linkedin');
-                    renderBenchmark(foundSheets.xSheet, 'A16:B26', xNameMap, 'benchmark-x', 'Benchmark X');
-                    renderBenchmark(foundSheets.igSheet, 'A16:B26', igNameMap, 'benchmark-ig', 'Benchmark Instagram');
+                    renderBenchmark(foundSheets.fbSheet, 'A16:B36', nameMaps.fb, 'benchmark-fb', 'Benchmark Facebook');
+                    renderBenchmark(foundSheets.liSheet, 'A3:B12', nameMaps.li, 'benchmark-linkedin', 'Benchmark Linkedin');
+                    renderBenchmark(foundSheets.xSheet, 'A16:B26', nameMaps.x, 'benchmark-x', 'Benchmark X');
+                    renderBenchmark(foundSheets.igSheet, 'A16:B26', nameMaps.ig, 'benchmark-ig', 'Benchmark Instagram');
 
                     uploadContainer.classList.add('hidden');
                     resultsContainer.classList.remove('hidden');
                     
-                    const navButtons = sectionNavContainer.querySelectorAll('.nav-button');
-                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    sectionNavContainer.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
                     sectionNavContainer.querySelector('[data-section="sintesi-gruppo"]').classList.add('active');
                     document.querySelectorAll('.report-section').forEach(section => section.classList.add('hidden'));
                     document.getElementById('sintesi-gruppo').classList.remove('hidden');
@@ -447,8 +448,16 @@
             let textToCopy = '';
             if (target.tagName === 'TABLE') {
                 const rows = target.querySelectorAll('tr');
-                rows.forEach(row => { const cells = row.querySelectorAll('th, td'); const rowText = Array.from(cells).map(cell => cell.innerText.trim()).join('\t'); textToCopy += rowText + '\n'; });
-            } else { textToCopy = target.innerText.trim(); }
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('th, td');
+                    // --- LOGICA DI COPIA PERFEZIONATA ---
+                    // Usa il valore raw se esiste, altrimenti il testo visibile.
+                    const rowText = Array.from(cells).map(cell => cell.dataset.rawValue || cell.innerText.trim()).join('\t');
+                    textToCopy += rowText + '\n';
+                });
+            } else {
+                textToCopy = target.innerText.trim();
+            }
             navigator.clipboard.writeText(textToCopy).then(() => { showFeedbackOnCopyButton(copyBtn, 'OK!'); }).catch(err => { console.error('Errore durante la copia:', err); showFeedbackOnCopyButton(copyBtn, 'Err'); });
         });
     });
