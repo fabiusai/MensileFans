@@ -4,19 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Mensile Followers</title>
-<link rel="icon" href="favicon.ico">
+    <link rel="icon" href="favicon.ico">
     <!-- Libreria per leggere i file Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Libreria D3.js per i grafici -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Nunito Sans (con peso regular 400 e 700) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary-color: #004282; /* Blu istituzionale */
-            --secondary-color: #ffd400; /* Giallo istituzionale */
+            /* Colori UI Principali (Header, Bottoni, etc) */
+            --primary-ui-blue: #004282;
+            --primary-ui-yellow: #ffd400;
+            
+            /* Colori Grafico dal UI Kit */
+            --chart-title-blue: #0431AE;
+            --chart-bar-blue: #bfd7fd;
+            --chart-text-grey: #7b7b7a;
+            
+            /* Colori Generali */
             --background-color: #f4f7fa;
             --text-color: #333333;
             --card-background: #ffffff;
             --border-color: #e0e0e0;
-            --font-family: 'Helvetica Neue', Arial, sans-serif;
+            --font-family: 'Nunito Sans', 'Helvetica Neue', Arial, sans-serif;
         }
 
         * {
@@ -33,132 +49,89 @@
         }
 
         header {
-            background-color: var(--primary-color);
+            background-color: var(--primary-ui-blue);
             color: white;
             padding: 1.5rem 2rem;
             text-align: center;
-            border-bottom: 5px solid var(--secondary-color);
-        }
-
-        header h1 {
-            font-weight: 600;
-        }
-
-        main {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
-
-        .card h2 {
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .file-upload-wrapper {
-            margin: 1.5rem 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-        }
-
-        .file-input-group {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .file-input-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-color);
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background-color: #fafafa;
-        }
-
-        button {
-            font-family: var(--font-family);
-            font-size: 1rem;
-            font-weight: 600;
-            padding: 0.8rem 1.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-            text-align: center;
-        }
-
-        #process-button {
-            background-color: var(--primary-color);
-            color: white;
-            display: block;
-            width: 100%;
-            max-width: 250px;
-            margin: 1rem auto 0;
-        }
-
-        #process-button:hover {
-            background-color: #003366; /* Blu più scuro */
+            border-bottom: 5px solid var(--primary-ui-yellow);
         }
         
-        #process-button:disabled {
-            background-color: #a0b4c8;
-            cursor: not-allowed;
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
 
-        #section-nav-container {
+        .upload-section {
+            background-color: var(--card-background);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--primary-ui-blue);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 3rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .drop-zone.dragover {
+            background-color: #e9f5ff;
+            border-color: var(--primary-ui-blue);
+        }
+
+        .drop-zone p {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .button-nav {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
+            justify-content: center;
+            gap: 0.5rem;
             margin-bottom: 2rem;
-            padding: 1rem;
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
         }
 
         .nav-button {
-            flex-grow: 1;
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 1px solid var(--border-color);
-            padding: 0.6rem 1rem;
-            font-weight: 600;
-        }
-        
-        .nav-button:hover {
-            background-color: #f0f5fa;
-            border-color: var(--primary-color);
+            background-color: #fff;
+            color: var(--primary-ui-blue);
+            border: 2px solid var(--primary-ui-blue);
+            padding: 0.6rem 1.2rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.3s, color 0.3s;
+            font-family: var(--font-family);
+            font-size: 0.9rem;
         }
 
-        .nav-button.active {
-            background-color: var(--primary-color);
+        .nav-button:hover, .nav-button.active {
+            background-color: var(--primary-ui-blue);
             color: white;
-            border-color: var(--primary-color);
         }
 
         .report-section {
-            padding: 2rem;
-            background: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            background-color: var(--card-background);
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
         }
 
         .hidden {
@@ -169,318 +142,668 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
-            margin-top: 1.5rem;
         }
 
-        .data-item {
-            background-color: #f9f9f9;
+        .data-item, .table-wrapper, .chart-wrapper {
+            background-color: #f8f9fc;
             padding: 1.5rem;
-            border-radius: 6px;
-            border: 1px solid #eee;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
             position: relative;
         }
-
-        .data-item h3 {
-            font-size: 1rem;
-            color: #555;
-            margin-bottom: 0.5rem;
+        
+        .data-item h3, .table-wrapper h3 {
+            font-size: 1.1rem;
+            color: var(--primary-ui-blue);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
         }
 
-        .data-item p {
-            font-size: 2rem;
+        .data-value {
+            font-size: 2.2rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--primary-ui-blue);
         }
+
+        .data-change {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .positive { color: #28a745; }
+        .negative { color: #dc3545; }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1.5rem;
         }
 
         th, td {
             padding: 0.8rem 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
         }
 
-        thead th {
-            background-color: #f1f1f1;
-            color: var(--primary-color);
-            font-weight: 600;
+        th {
+            background-color: #eef2f7;
+            font-weight: 700;
+            color: var(--primary-ui-blue);
         }
 
-        .numeric-cell {
-            text-align: right;
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #fdfdfd;
         }
 
-        tbody tr:hover {
-            background-color: #f9f9f9;
-        }
-
-        .copy-button {
+        .copy-button, .export-svg-btn, .copy-svg-btn {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: #e0e0e0;
-            border: none;
-            border-radius: 50%;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            color: #495057;
             width: 32px;
             height: 32px;
+            border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background-color 0.2s;
-            padding: 0;
         }
-        .copy-button:hover {
-            background-color: var(--secondary-color);
+        
+        .copy-button:hover, .export-svg-btn:hover, .copy-svg-btn:hover {
+            background-color: #dee2e6;
         }
-        .copy-button svg {
-            width: 16px;
-            height: 16px;
-            fill: #333;
-        }
-        .copy-button.table-copy {
+
+        .chart-controls {
             position: static;
-            display: inline-flex;
-            margin-left: 1rem;
-            vertical-align: middle;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .table-wrapper {
-            position: relative;
+        .chart-controls .export-svg-btn, .chart-controls .copy-svg-btn {
+            position: static;
+            width: auto;
+            height: auto;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
-        .table-wrapper > h2, .table-wrapper > h3 {
-            display: inline-block;
+        .chart-controls .copy-svg-btn {
+           background-color: var(--primary-ui-blue);
+           color: white;
+           border-color: var(--primary-ui-blue);
+        }
+        .chart-controls .copy-svg-btn:hover {
+            background-color: #003366;
+        }
+        
+        .chart-container {
+            overflow-x: auto;
         }
 
-        .tables-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
+        /* Stili per il grafico SVG */
+        .benchmark-chart .axis-label, .benchmark-chart .tick text {
+            font-family: 'Nunito Sans', sans-serif;
+            font-weight: 400;
+            fill: var(--chart-text-grey);
+        }
+        .benchmark-chart .bar-label {
+            font-family: 'Nunito Sans', sans-serif;
+            font-weight: 700;
+            fill: var(--chart-title-blue);
+        }
+        .benchmark-chart .grid-line {
+            stroke: #e0e0e0;
+            stroke-dasharray: 2,2;
         }
 
-        @media (max-width: 992px) {
-            .tables-container {
-                grid-template-columns: 1fr;
-            }
+        #loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
         }
-        @media (max-width: 768px) {
-            main { padding: 1rem; }
-            header { padding: 1rem; }
-            .file-upload-wrapper { flex-direction: column; gap: 1.5rem; }
+
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid var(--primary-ui-blue);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
         }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
     </style>
 </head>
 <body>
 
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
     <header>
-        <h1>Report Mensile Followers</h1>
+        <h1 class="text-3xl font-bold">Report Mensile Followers</h1>
     </header>
 
-    <main>
-        <div id="upload-container" class="card">
-            <h2>Caricamento File</h2>
-            <p>Carica i report per generare l'analisi.</p>
-            <div class="file-upload-wrapper">
-                <div class="file-input-group">
-                    <label for="file-report1">1. Report Emplifi (Fans Globale)</label>
-                    <input type="file" id="file-report1" accept=".xlsx">
-                </div>
-                <div class="file-input-group">
-                    <label for="file-report2">2. Report LinkedIn (Competitor Analytics)</label>
-                    <input type="file" id="file-report2" accept=".xlsx">
-                </div>
+    <main class="main-container">
+        <section class="upload-section">
+            <h2>Carica i file Excel</h2>
+            <div id="drop-zone" class="drop-zone">
+                <input type="file" id="file-input" multiple class="file-input" accept=".xlsx, .xls, .csv">
+                <p>Trascina i file qui o clicca per selezionarli</p>
             </div>
-            <button id="process-button">Genera Report</button>
-        </div>
+        </section>
 
-        <div id="results-container" class="hidden">
-            <div id="section-nav-container">
-                <button class="nav-button active" data-section="sintesi-gruppo">Sintesi dati di Gruppo</button>
-                <button class="nav-button" data-section="benchmark-fb">Benchmark Facebook</button>
-                <button class="nav-button" data-section="benchmark-x">Benchmark X</button>
-                <button class="nav-button" data-section="benchmark-linkedin">Benchmark Linkedin</button>
-                <button class="nav-button" data-section="benchmark-ig">Benchmark Instagram</button>
-            </div>
-
-            <div id="sections-wrapper">
-                <section id="sintesi-gruppo" class="report-section"></section>
-                <section id="benchmark-fb" class="report-section hidden"></section>
-                <section id="benchmark-x" class="report-section hidden"></section>
-                <section id="benchmark-linkedin" class="report-section hidden"></section>
-                <section id="benchmark-ig" class="report-section hidden"></section>
-            </div>
+        <div id="report-content" class="hidden">
+            <nav id="button-nav" class="button-nav"></nav>
+            <div id="sections-wrapper"></div>
         </div>
     </main>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-
-        const processButton = document.getElementById('process-button');
-        const fileInput1 = document.getElementById('file-report1');
-        const fileInput2 = document.getElementById('file-report2');
-        const uploadContainer = document.getElementById('upload-container');
-        const resultsContainer = document.getElementById('results-container');
-        const sectionNavContainer = document.getElementById('section-nav-container');
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const reportContent = document.getElementById('report-content');
+        const buttonNav = document.getElementById('button-nav');
         const sectionsWrapper = document.getElementById('sections-wrapper');
+        const loader = document.getElementById('loader');
 
-        const nameMaps = {
-            fb: { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'Dhl Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'Ho Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' },
-            x: { 'Royal Mail (https://twitter.com/RoyalMail)': 'Royal Mail', 'Poste Italiane (https://twitter.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa_IT (https://twitter.com/Frecciarossa_IT)': 'Frecciarossa', 'PosteSpedizioni (https://twitter.com/PosteSpedizioni)': 'PosteSpedizioni', 'eni (https://twitter.com/eni)': 'Eni', 'WebPoste (https://twitter.com/WebPoste)': 'WebPoste', 'Deutsche Post und DHL News (https://twitter.com/DeutschePostDHL)': 'Deutsche Post', 'UniCredit Italia (https://twitter.com/UniCredit_IT)': 'UniCredit', 'Enel Group (https://twitter.com/EnelGroupIT)': 'Enel', 'Intesa Sanpaolo (https://twitter.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Banca MPS (https://twitter.com/Banca_MPS)': 'Banca MPS' },
-            li: { 'Poste Italiane': 'Poste Italiane', 'Intesa Sanpaolo': 'Intesa Sanpaolo', 'Eni': 'Eni', 'Trenitalia': 'Trenitalia', 'INPS_official': 'Inps', 'CDP Cassa Depositi e Prestiti': 'Cassa Depositi e Prestiti', 'BNL BNP Paribas': 'BNL BNP Paribas', 'UniCredit': 'UniCredit', 'Enel Group': 'Enel', 'Gruppo Ferrovie dello Stato Italiane': 'Gruppo FS' },
-            ig: { 'Vodafone It (https://instagram.com/vodafoneit)': 'Vodafone', 'TIM (https://instagram.com/timofficial)': 'Tim', 'Royal Mail 📮 (https://instagram.com/royalmailofficial)': 'Royal Mail', 'Poste Italiane (https://instagram.com/posteitaliane)': 'Poste Italiane', 'WINDTRE (https://instagram.com/windtre)': 'Wind Tre', 'Intesa Sanpaolo (https://instagram.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Eni (https://instagram.com/eni)': 'Eni', 'Enel Group (https://instagram.com/enelgroup)': 'Enel', 'DHL Express Italy (https://instagram.com/dhlexpressitaly)': 'Dhl Italia', 'Postepay (https://instagram.com/postepay)': 'Postepay', 'Banca Monte dei Paschi di Siena (https://instagram.com/banca_mps)': 'Banca MPS' }
-        };
-
-        // Funzione per il totale, senza segno
-        const formatNumberK_M = (num) => { if (num >= 1000000) return `${(num / 1000000).toFixed(2).replace(/\.00$/, '').replace(/\.([1-9])0$/, '.$1')}M`; if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`; return num.toString(); };
-        
-        // --- NUOVA FUNZIONE SPECIFICA PER LA VARIAZIONE ---
-        const formatVariationK_M = (num) => {
-            if (num === 0) return '0';
-            const sign = num > 0 ? '+' : ''; // Il meno viene aggiunto automaticamente
-            const absNum = Math.abs(num);
-            let formatted;
-
-            if (absNum >= 1000000) {
-                formatted = (absNum / 1000000).toFixed(2).replace(/\.00$/, '').replace(/\.([1-9])0$/, '.$1') + 'M';
-            } else if (absNum >= 1000) {
-                formatted = (absNum / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-            } else {
-                formatted = absNum.toString();
+        // Gestione Drag & Drop
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                fileInput.files = files;
+                handleFiles(files);
             }
-            // Aggiunge il segno e sostituisce il punto con la virgola per l'italiano
-            return sign + num.toString().charAt(0) === '-' ? '-' + formatted.replace('.', ',') : sign + formatted.replace('.', ',');
-        };
-
-        const convertExcelDate = (excelDate) => { if (typeof excelDate !== 'number' || excelDate < 1) return excelDate; const date = new Date((excelDate - 25569) * 86400 * 1000); const day = String(date.getUTCDate()).padStart(2, '0'); const month = String(date.getUTCMonth() + 1).padStart(2, '0'); const year = date.getUTCFullYear(); return `${day}/${month}/${year}`; };
-        const createCopyButton = (isTable = false) => { const btnClass = isTable ? 'copy-button table-copy' : 'copy-button'; return `<button class="${btnClass}" title="Copia"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>`; };
-        const showFeedbackOnButton = (button, message, originalText) => { button.textContent = message; setTimeout(() => { button.textContent = originalText; }, 1500); };
-        const showFeedbackOnCopyButton = (button, message) => { const originalContent = button.innerHTML; button.innerHTML = `<span style="font-size: 12px; font-weight: 600;">${message}</span>`; setTimeout(() => { button.innerHTML = originalContent; }, 1500); };
-        const findSheetFuzzy = (workbook, targetName) => { const normalizedTarget = targetName.toLowerCase().trim(); const sheetName = workbook.SheetNames.find(name => name.toLowerCase().trim() === normalizedTarget); return sheetName ? workbook.Sheets[sheetName] : null; };
-
-        const renderSintesi = (summarySheet, growthSheet, channelSheet) => {
-            const totalFollowers = summarySheet['A13'] ? summarySheet['A13'].v : 0;
-            const prevMonthFollowers = summarySheet['B13'] ? summarySheet['B13'].v : 0;
-            const variation = totalFollowers - prevMonthFollowers;
-            const relativeVariation = summarySheet['C13'] ? summarySheet['C13'].w : 'N/D';
-
-            let trendData = [];
-            if (growthSheet) {
-                const growthData = XLSX.utils.sheet_to_json(growthSheet, { header: 1, range: "A13:B43", defval: null });
-                trendData = growthData
-                    .filter(row => row && row.length >= 2 && row[0] !== null && row[1] !== null)
-                    .map(row => ({
-                        date: typeof row[0] === 'number' ? convertExcelDate(row[0]) : row[0],
-                        rawValue: parseFloat(row[1]) || 0,
-                        formattedValue: !isNaN(parseFloat(row[1])) ? parseFloat(row[1]).toLocaleString('it-IT') : row[1]
-                    }));
+        });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                handleFiles(fileInput.files);
             }
-            
-            let channelData = [];
-            if (channelSheet) {
-                const rawChannelData = XLSX.utils.sheet_to_json(channelSheet, { header: 1, range: "A13:B17", defval: null });
-                channelData = rawChannelData
-                    .filter(row => row && row.length >= 2 && row[0] !== null && row[1] !== null)
-                    .map(row => ({
-                        canale: row[0],
-                        rawValue: parseFloat(row[1]) || 0,
-                        formattedValue: !isNaN(parseFloat(row[1])) ? parseFloat(row[1]).toLocaleString('it-IT') : row[1]
-                    }));
-            }
-           
-            const html = `<h2>Sintesi dati di Gruppo</h2><div class="data-grid"><div class="data-item">${createCopyButton()}<h3>Totale iscritti ai canali</h3><p data-copy-target data-raw-value="${totalFollowers}">${formatNumberK_M(totalFollowers)}</p></div><div class="data-item">${createCopyButton()}<h3>Variazione vs mese precedente</h3><p data-copy-target data-raw-value="${variation}">${formatVariationK_M(variation)}</p></div><div class="data-item">${createCopyButton()}<h3>Variazione relativa vs mese precedente</h3><p data-copy-target>${relativeVariation}</p></div></div><div class="tables-container"><div class="table-wrapper"><h3>Andamento crescita ultimo mese ${createCopyButton(true)}</h3><table data-copy-target><thead><tr><th>Data</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${trendData.map(row => `<tr><td>${row.date}</td><td class="numeric-cell" data-raw-value="${row.rawValue}">${row.formattedValue}</td></tr>`).join('')}</tbody></table></div><div class="table-wrapper"><h3>Follower per canale ${createCopyButton(true)}</h3><table data-copy-target><thead><tr><th>Canale</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${channelData.map(row => `<tr><td>${row.canale}</td><td class="numeric-cell" data-raw-value="${row.rawValue}">${row.formattedValue}</td></tr>`).join('')}</tbody></table></div></div>`;
-            document.getElementById('sintesi-gruppo').innerHTML = html;
-        };
-
-        const renderBenchmark = (sheet, range, nameMap, elementId, title) => {
-            const data = XLSX.utils.sheet_to_json(sheet, { header: 1, range: range, defval: null });
-            const processedData = data.map(row => ({ page: (row && row.length > 0 && row[0] !== null) ? (nameMap[row[0].trim()] || row[0].trim()) : '', followers: (row && row.length >= 2) ? parseFloat(row[1]) : NaN })).filter(item => item.page && !isNaN(item.followers)).sort((a, b) => b.followers - a.followers);
-            const html = `<div class="table-wrapper"><h2>${title} ${createCopyButton(true)}</h2><table data-copy-target><thead><tr><th>Pagina</th><th class="numeric-cell">Followers</th></tr></thead><tbody>${processedData.map(row => `<tr><td>${row.page}</td><td class="numeric-cell" data-raw-value="${row.followers}">${row.followers.toLocaleString('it-IT')}</td></tr>`).join('')}</tbody></table></div>`;
-            document.getElementById(elementId).innerHTML = html;
-        };
-
-        processButton.addEventListener('click', () => {
-            if (!fileInput1.files[0] || !fileInput2.files[0]) { alert('Per favore, carica entrambi i file Excel.'); return; }
-            const originalButtonText = processButton.textContent;
-            processButton.textContent = "Caricamento...";
-            processButton.disabled = true;
-
-            const readFile = (file) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = e => resolve(new Uint8Array(e.target.result)); reader.onerror = e => reject(new Error(`Errore durante la lettura del file ${file.name}`)); reader.readAsArrayBuffer(file); });
-
-            Promise.all([readFile(fileInput1.files[0]), readFile(fileInput2.files[0])]).then(([data1, data2]) => {
-                try {
-                    const workbook1 = XLSX.read(data1, { type: 'array' });
-                    const workbook2 = XLSX.read(data2, { type: 'array' });
-
-                    const sheetsToFind1 = { summarySheet: 'Total community size', growthSheet: 'Fans Poste Crescita', channelSheet: 'Fans Poste per piattaforma', fbSheet: 'FB Followers', xSheet: 'X Followers', igSheet: 'IG followers' };
-                    const sheetsToFind2 = { liSheet: 'COMPETITORS' };
-                    let foundSheets = {}, missingSheets = [];
-
-                    for (const [key, name] of Object.entries(sheetsToFind1)) { if (!(foundSheets[key] = findSheetFuzzy(workbook1, name))) missingSheets.push(name); }
-                    for (const [key, name] of Object.entries(sheetsToFind2)) { if (!(foundSheets[key] = findSheetFuzzy(workbook2, name))) missingSheets.push(`${name} (dal file 2)`); }
-
-                    if (missingSheets.length > 0) { throw new Error(`I seguenti fogli non sono stati trovati: [${missingSheets.join(', ')}].\n\nFogli disponibili nel file 1: [${workbook1.SheetNames.join(', ')}]\nFogli disponibili nel file 2: [${workbook2.SheetNames.join(', ')}]`); }
-
-                    renderSintesi(foundSheets.summarySheet, foundSheets.growthSheet, foundSheets.channelSheet);
-                    renderBenchmark(foundSheets.fbSheet, 'A16:B36', nameMaps.fb, 'benchmark-fb', 'Benchmark Facebook');
-                    renderBenchmark(foundSheets.liSheet, 'A3:B12', nameMaps.li, 'benchmark-linkedin', 'Benchmark Linkedin');
-                    renderBenchmark(foundSheets.xSheet, 'A16:B26', nameMaps.x, 'benchmark-x', 'Benchmark X');
-                    renderBenchmark(foundSheets.igSheet, 'A16:B26', nameMaps.ig, 'benchmark-ig', 'Benchmark Instagram');
-
-                    uploadContainer.classList.add('hidden');
-                    resultsContainer.classList.remove('hidden');
-                    
-                    sectionNavContainer.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-                    sectionNavContainer.querySelector('[data-section="sintesi-gruppo"]').classList.add('active');
-                    document.querySelectorAll('.report-section').forEach(section => section.classList.add('hidden'));
-                    document.getElementById('sintesi-gruppo').classList.remove('hidden');
-                    
-                    showFeedbackOnButton(processButton, 'Fatto!', originalButtonText);
-                } catch (error) {
-                    console.error("Errore durante l'elaborazione dei file:", error);
-                    alert(`Si è verificato un errore:\n\n${error.message}`);
-                    showFeedbackOnButton(processButton, 'Errore!', originalButtonText);
-                } finally {
-                    processButton.disabled = false;
-                }
-            });
         });
 
-        sectionNavContainer.addEventListener('click', (e) => {
+        function showLoader() { loader.style.display = 'flex'; }
+        function hideLoader() { loader.style.display = 'none'; }
+
+        async function handleFiles(files) {
+            showLoader();
+            const fileData = {};
+            for (const file of files) {
+                try {
+                    const data = await file.arrayBuffer();
+                    const workbook = XLSX.read(data);
+                    fileData[file.name] = workbook;
+                } catch (error) {
+                    console.error(`Errore nel leggere il file ${file.name}:`, error);
+                    alert(`Non è stato possibile leggere il file ${file.name}. Assicurati che sia un file Excel valido.`);
+                }
+            }
+            if (Object.keys(fileData).length > 0) {
+                processFiles(fileData);
+            }
+            hideLoader();
+        }
+        
+        function getSheetData(workbook, sheetName) {
+            if (!workbook.SheetNames.includes(sheetName)) return [];
+            return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+        }
+        
+        function findValueByLabel(data, label) {
+            for (const row of data) {
+                if (row && row[0] && typeof row[0] === 'string' && row[0].trim().toLowerCase() === label.toLowerCase()) {
+                    return row[1];
+                }
+            }
+            return null;
+        }
+        
+        function findRowIndex(data, label) {
+            return data.findIndex(row => row && row[0] && typeof row[0] === 'string' && row[0].trim().toLowerCase().startsWith(label.toLowerCase()));
+        }
+
+        function formatNumber(n) {
+            if (typeof n !== 'number') return String(n).replace('.',',');
+
+            if (n >= 1000000) {
+                const millions = n / 1000000;
+                let formatted = millions.toFixed(2);
+                if (formatted.endsWith('.00')) {
+                    formatted = formatted.substring(0, formatted.length - 3);
+                }
+                else if (formatted.endsWith('0')) {
+                    formatted = formatted.substring(0, formatted.length - 1);
+                }
+                return formatted.replace('.', ',') + 'M';
+            }
+
+            if (n >= 1000) {
+                return Math.round(n / 1000) + 'K';
+            }
+            return n.toLocaleString('it-IT');
+        }
+
+        function formatNumberWithThousands(n, decimalPlaces = 0) {
+            if (typeof n !== 'number') return String(n).replace('.',',');
+            const options = {};
+            if (decimalPlaces > 0) {
+                options.minimumFractionDigits = decimalPlaces;
+                options.maximumFractionDigits = decimalPlaces;
+            }
+            return n.toLocaleString('it-IT', options);
+        }
+
+        function createBenchmarkChart(containerId, data, title) {
+            const container = d3.select(containerId);
+            if (container.empty()) {
+                console.error(`Container con ID ${containerId} non trovato.`);
+                return;
+            }
+            container.selectAll("*").remove();
+
+            const width = 2300;
+            const height = 519;
+            const margin = { top: 80, right: 40, bottom: 200, left: 140 }; // Aumentati margini per font più grandi
+
+            const svg = container.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .style("background-color", "transparent")
+                .attr("class", "benchmark-chart");
+
+            const x = d3.scaleBand()
+                .domain(data.map(d => d.name))
+                .range([margin.left, width - margin.right])
+                .padding(0.3); // Ridotto per allargare le barre e avvicinarle
+
+            const yMax = d3.max(data, d => d.value);
+            const y = d3.scaleLinear()
+                .domain([0, yMax * 1.2]) // Aumentato yMax per più spazio in alto
+                .range([height - margin.bottom, margin.top]);
+
+            const xAxis = d3.axisBottom(x).tickSize(0);
+            const xAxisGroup = svg.append("g")
+                .attr("transform", `translate(0,${height - margin.bottom})`)
+                .call(xAxis);
+            
+            xAxisGroup.selectAll("text")
+                .attr("class", "axis-label")
+                .attr("transform", "rotate(-45)")
+                .style("text-anchor", "end")
+                .attr("dy", "0.8em") 
+                .style("font-size", "26px"); // Ingrandito significativamente
+            xAxisGroup.select(".domain").remove();
+
+            const yTicks = y.ticks(5).filter(tick => tick > 0);
+            const yAxis = d3.axisLeft(y)
+                .tickValues(yTicks)
+                .tickFormat(formatNumber)
+                .tickSize(-(width - margin.left - margin.right));
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(yAxis)
+                .call(g => g.select(".domain").remove())
+                .call(g => g.selectAll(".tick line").attr("class", "grid-line"))
+                .call(g => g.selectAll(".tick text")
+                    .attr("class", "axis-label")
+                    .attr("dx", "-0.5em")
+                    .style("font-size", "26px") // Ingrandito significativamente
+                );
+
+            svg.append("g")
+                .selectAll("rect")
+                .data(data)
+                .join("rect")
+                .attr("x", d => x(d.name))
+                .attr("y", d => y(d.value))
+                .attr("height", d => y(0) - y(d.value))
+                .attr("width", x.bandwidth())
+                .attr("fill", d => d.name.toLowerCase().includes('poste') ? 'var(--chart-title-blue)' : 'var(--chart-bar-blue)');
+
+            svg.append("g")
+                .selectAll("text")
+                .data(data)
+                .join("text")
+                .attr("class", "bar-label")
+                .attr("x", d => x(d.name) + x.bandwidth() / 2)
+                .attr("y", d => y(d.value) - 12)
+                .attr("text-anchor", "middle")
+                .style("font-size", "26px") // Ingrandito
+                .text(d => formatNumber(d.value));
+
+            // Titolo
+            svg.append("text")
+                .attr("x", margin.left)
+                .attr("y", margin.top - 40)
+                .attr("text-anchor", "start")
+                .style("font-size", "32px") // Ingrandito
+                .style("font-weight", "bold")
+                .style("fill", "var(--chart-title-blue)")
+                .style("font-family", "var(--font-family)")
+                .text(title);
+
+            // Linea sotto il titolo
+            svg.append("line")
+                .attr("x1", margin.left)
+                .attr("y1", margin.top - 25)
+                .attr("x2", margin.left + 350) 
+                .attr("y2", margin.top - 25)
+                .attr("stroke", "var(--chart-title-blue)")
+                .attr("stroke-width", 2);
+        }
+
+        function getStyledSvgString(svgElement) {
+            const svgClone = svgElement.cloneNode(true);
+            const allOriginalElements = svgElement.querySelectorAll('*');
+            const allClonedElements = svgClone.querySelectorAll('*');
+
+            allOriginalElements.forEach((origEl, index) => {
+                const cloneEl = allClonedElements[index];
+                const computedStyle = window.getComputedStyle(origEl);
+                let inlineStyle = "";
+                for (let i = 0; i < computedStyle.length; i++) {
+                    const prop = computedStyle[i];
+                    inlineStyle += `${prop}: ${computedStyle.getPropertyValue(prop)}; `;
+                }
+                cloneEl.setAttribute('style', inlineStyle);
+            });
+            return new XMLSerializer().serializeToString(svgClone);
+        }
+
+        async function copySvgToClipboard(svgElement, button) {
+            showFeedbackOnCopyButton(button, 'Copiando...');
+            try {
+                const svgData = getStyledSvgString(svgElement);
+                const canvas = document.createElement("canvas");
+                const width = +svgElement.getAttribute('width');
+                const height = +svgElement.getAttribute('height');
+                
+                const scaleFactor = 2;
+                canvas.width = width * scaleFactor;
+                canvas.height = height * scaleFactor;
+                
+                const ctx = canvas.getContext("2d");
+                ctx.scale(scaleFactor, scaleFactor);
+
+                const img = new Image();
+                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+
+                img.onload = async () => {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    URL.revokeObjectURL(url);
+                    canvas.toBlob(async (blob) => {
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            showFeedbackOnCopyButton(button, 'OK!');
+                        } catch (err) {
+                           console.error('Errore durante la scrittura negli appunti:', err);
+                           showFeedbackOnCopyButton(button, 'Err!');
+                        }
+                    }, 'image/png');
+                };
+                img.onerror = (e) => {
+                    URL.revokeObjectURL(url);
+                    console.error('Errore nel caricare l\'immagine SVG nel canvas', e);
+                    showFeedbackOnCopyButton(button, 'Err!');
+                };
+                img.src = url;
+
+            } catch (err) {
+                console.error('Errore durante la copia del grafico:', err);
+                showFeedbackOnCopyButton(button, 'Err!');
+            }
+        }
+        
+        function exportSvg(svgElement, filename) {
+            try {
+                const svgData = getStyledSvgString(svgElement);
+                const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Errore durante l\'esportazione del SVG:', err);
+            }
+        }
+        
+        function processFiles(fileData) {
+            const fansGlobaleWorkbook = Object.values(fileData).find(wb => wb.SheetNames.includes('Total community size'));
+            const competitorWorkbook = Object.values(fileData).find(wb => wb.SheetNames.includes('COMPETITORS'));
+
+            if (!fansGlobaleWorkbook || !competitorWorkbook) {
+                alert("Assicurati di aver caricato sia il file 'Report - Fans globale' che quello dei 'Competitor'.");
+                return;
+            }
+
+            buttonNav.innerHTML = '';
+            sectionsWrapper.innerHTML = '';
+
+            const totalCommunitySheet = getSheetData(fansGlobaleWorkbook, 'Total community size');
+            
+            let totalCommunitySize = 0, relativeChange = '0%', totalGrowth = 0;
+
+            const headerRowIndex = totalCommunitySheet.findIndex(row => row && String(row[2]).toLowerCase().includes('relative change'));
+            if (headerRowIndex > -1 && totalCommunitySheet.length > headerRowIndex + 1) {
+                const dataRow = totalCommunitySheet[headerRowIndex + 1];
+                totalCommunitySize = Number(dataRow[0]);
+                const previousTotal = Number(dataRow[1]);
+                relativeChange = String(dataRow[2]);
+                totalGrowth = totalCommunitySize - previousTotal;
+            }
+            
+            const perPiattaformaSheet = getSheetData(fansGlobaleWorkbook, 'Fans Poste per piattaforma');
+            const platformData = perPiattaformaSheet.slice(findRowIndex(perPiattaformaSheet, 'facebook'));
+
+            const nameMaps = {            
+                fb: { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'DHL Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'ho. Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' },
+                x: { 'Royal Mail (https://twitter.com/RoyalMail)': 'Royal Mail', 'Poste Italiane (https://twitter.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa_IT (https://twitter.com/Frecciarossa_IT)': 'Frecciarossa', 'PosteSpedizioni (https://twitter.com/PosteSpedizioni)': 'PosteSpedizioni', 'eni (https://twitter.com/eni)': 'Eni', 'WebPoste (https://twitter.com/WebPoste)': 'WebPoste', 'Deutsche Post und DHL News (https://twitter.com/DeutschePostDHL)': 'Deutsche Post', 'UniCredit Italia (https://twitter.com/UniCredit_IT)': 'UniCredit', 'Enel Group (https://twitter.com/EnelGroupIT)': 'Enel', 'Intesa Sanpaolo (https://twitter.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Banca MPS (https://twitter.com/Banca_MPS)': 'Banca MPS' },
+                li: { 'Poste Italiane': 'Poste Italiane', 'Intesa Sanpaolo': 'Intesa Sanpaolo', 'Eni': 'Eni', 'Trenitalia': 'Trenitalia', 'INPS_official': 'INPS', 'CDP Cassa Depositi e Prestiti': 'Cassa Depositi e Prestiti', 'BNL BNP Paribas': 'BNL BNP Paribas', 'UniCredit': 'UniCredit', 'Enel Group': 'Enel', 'Gruppo Ferrovie dello Stato Italiane': 'Gruppo FS' },
+                ig: { 'Vodafone It (https://instagram.com/vodafoneit)': 'Vodafone', 'TIM (https://instagram.com/timofficial)': 'Tim', 'Royal Mail 📮 (https://instagram.com/royalmailofficial)': 'Royal Mail', 'Poste Italiane (https://instagram.com/posteitaliane)': 'Poste Italiane', 'WINDTRE (https://instagram.com/windtre)': 'WindTre', 'Intesa Sanpaolo (https://instagram.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Eni (https://instagram.com/eni)': 'Eni', 'Enel Group (https://instagram.com/enelgroup)': 'Enel', 'DHL Express Italy (https://instagram.com/dhlexpressitaly)': 'DHL Italia', 'Postepay (https://instagram.com/postepay)': 'Postepay', 'Banca Monte dei Paschi di Siena (https://instagram.com/banca_mps)': 'Banca MPS' }
+            };
+
+            const cleanName = (row, platform) => {
+                const originalName = String(row[0]).trim();
+                const platformMap = nameMaps[platform] || {};
+                const rewrittenName = platformMap[originalName] || originalName.split('(')[0].trim();
+                return { name: rewrittenName, value: row[1] };
+            };
+
+            const fbFollowersSheet = getSheetData(fansGlobaleWorkbook, 'FB Followers');
+            const fbData = fbFollowersSheet.slice(findRowIndex(fbFollowersSheet, 'vodafone')).map(r => cleanName(r, 'fb')).sort((a,b) => b.value - a.value);
+
+            const igFollowersSheet = getSheetData(fansGlobaleWorkbook, 'IG followers');
+            const igData = igFollowersSheet.slice(findRowIndex(igFollowersSheet, 'tim')).map(r => cleanName(r, 'ig')).sort((a,b) => b.value - a.value);
+
+            const xFollowersSheet = getSheetData(fansGlobaleWorkbook, 'X followers');
+            const xData = xFollowersSheet.slice(findRowIndex(xFollowersSheet, 'royal mail')).map(r => cleanName(r, 'x')).sort((a,b) => b.value - a.value);
+
+            const competitorSheet = getSheetData(competitorWorkbook, 'COMPETITORS');
+            const linkedInData = competitorSheet.slice(2).map(r => cleanName(r, 'li')).sort((a,b) => b.value - a.value);
+
+            const sections = {
+                'dati-generali': { title: 'Dati Generali Poste', content: `
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <h3>Dimensione totale community</h3>
+                            <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
+                            <p class="data-value" data-copy-target>${formatNumber(totalCommunitySize)}</p>
+                        </div>
+                        <div class="data-item">
+                             <h3>Variazione vs Mese Prec.</h3>
+                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
+                            <p class="data-value ${String(relativeChange).includes('-') ? 'negative' : 'positive'}" data-copy-target>${String(relativeChange).replace('.', ',')}</p>
+                        </div>
+                        <div class="data-item">
+                             <h3>Crescita Totale nel Mese</h3>
+                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
+                            <p class="data-value positive" data-copy-target>+${formatNumber(totalGrowth)}</p>
+                        </div>
+                    </div>
+                ` },
+                'dati-piattaforma': { title: 'Dati per Piattaforma', content: createTableHTML(platformData, ['Piattaforma', 'Followers'], 'Followers per Piattaforma') },
+                'benchmark-fb': { title: 'Benchmark Facebook', data: fbData, chartTitle: 'FACEBOOK' },
+                'benchmark-ig': { title: 'Benchmark Instagram', data: igData, chartTitle: 'INSTAGRAM' },
+                'benchmark-x': { title: 'Benchmark X', data: xData, chartTitle: 'X' },
+                'benchmark-linkedin': { title: 'Benchmark LinkedIn', data: linkedInData, chartTitle: 'LINKEDIN' },
+            };
+
+            let isFirst = true;
+            for (const [id, section] of Object.entries(sections)) {
+                const button = document.createElement('button');
+                button.className = `nav-button ${isFirst ? 'active' : ''}`;
+                button.textContent = section.title;
+                button.dataset.section = id;
+                buttonNav.appendChild(button);
+
+                const sectionDiv = document.createElement('div');
+                sectionDiv.id = id;
+                sectionDiv.className = `report-section ${!isFirst ? 'hidden' : ''}`;
+                
+                if (id.startsWith('benchmark-')) {
+                   sectionDiv.innerHTML = `
+                     <div class="chart-wrapper">
+                         <div class="chart-controls">
+                             <button class="export-svg-btn" data-chart-id="${id}-chart-container" title="Esporta SVG">Esporta SVG</button>
+                             <button class="copy-svg-btn" data-chart-id="${id}-chart-container" title="Copia Grafico">Copia Grafico</button>
+                         </div>
+                         <div class="chart-container" id="${id}-chart-container"></div>
+                     </div>
+                     ${createTableHTML(section.data.map(d => [d.name, d.value]), ['Pagina', 'Followers'], section.title)}
+                   `;
+                } else {
+                    sectionDiv.innerHTML = section.content;
+                }
+                sectionsWrapper.appendChild(sectionDiv);
+                
+                if (id.startsWith('benchmark-')) {
+                   createBenchmarkChart(`#${id}-chart-container`, section.data, section.chartTitle);
+                }
+
+                isFirst = false;
+            }
+
+            reportContent.classList.remove('hidden');
+        }
+
+        function createTableHTML(data, headers, title) {
+            let tableRows = data.map(row => `<tr>${row.map((cell, index) => `<td>${index === 1 && typeof cell === 'number' ? formatNumberWithThousands(cell) : cell}</td>`).join('')}</tr>`).join('');
+            return `
+                <div class="table-wrapper">
+                    <button class="copy-button" title="Copia tabella"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
+                    <h3>${title}</h3>
+                    <table data-copy-target>
+                        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function showFeedbackOnCopyButton(button, message) {
+            const originalContent = button.innerHTML;
+            button.innerHTML = message;
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+            }, 1500);
+        }
+        
+        buttonNav.addEventListener('click', (e) => {
             const clickedButton = e.target.closest('.nav-button');
             if (!clickedButton) return;
             const sectionId = clickedButton.dataset.section;
-            sectionNavContainer.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
             clickedButton.classList.add('active');
             document.querySelectorAll('.report-section').forEach(section => section.classList.toggle('hidden', section.id !== sectionId));
         });
 
         sectionsWrapper.addEventListener('click', (e) => {
             const copyBtn = e.target.closest('.copy-button');
-            if (!copyBtn) return;
-            const parentWrapper = copyBtn.closest('.data-item, .table-wrapper');
-            if (!parentWrapper) return;
-            const target = parentWrapper.querySelector('[data-copy-target]');
-            if (!target) return;
-            let textToCopy = '';
-            if (target.tagName === 'TABLE') {
-                const rows = target.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('th, td');
-                    const rowText = Array.from(cells).map(cell => cell.dataset.rawValue || cell.innerText.trim()).join('\t');
-                    textToCopy += rowText + '\n';
+            const exportBtn = e.target.closest('.export-svg-btn');
+            const copyChartBtn = e.target.closest('.copy-svg-btn');
+            
+            if (copyBtn) {
+                const parentWrapper = copyBtn.closest('.data-item, .table-wrapper');
+                const target = parentWrapper.querySelector('[data-copy-target]');
+                if (!target) return;
+                
+                let textToCopy = '';
+                if (target.tagName === 'TABLE') {
+                    const rows = target.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('th, td');
+                        const rowText = Array.from(cells).map(cell => cell.innerText.trim()).join('\t');
+                        textToCopy += rowText + '\n';
+                    });
+                } else {
+                    textToCopy = target.innerText.trim();
+                }
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    showFeedbackOnCopyButton(copyBtn, 'OK!');
+                }).catch(err => {
+                    console.error('Errore durante la copia:', err);
+                    showFeedbackOnCopyButton(copyBtn, 'Err');
                 });
-            } else {
-                // Modifica per la copia dei dati singoli
-                textToCopy = target.dataset.rawValue || target.innerText.trim();
+            } else if (exportBtn) {
+                const chartContainerId = exportBtn.dataset.chartId;
+                const svgElement = document.querySelector(`#${chartContainerId} svg`);
+                if(svgElement) {
+                    exportSvg(svgElement, `${chartContainerId}.svg`);
+                    showFeedbackOnCopyButton(exportBtn, 'OK!');
+                } else {
+                    showFeedbackOnCopyButton(exportBtn, 'Err!');
+                }
+            } else if (copyChartBtn) {
+                 const chartContainerId = copyChartBtn.dataset.chartId;
+                 const svgElement = document.querySelector(`#${chartContainerId} svg`);
+                 if(svgElement) {
+                    copySvgToClipboard(svgElement, copyChartBtn);
+                 } else {
+                    showFeedbackOnCopyButton(copyChartBtn, 'Err!');
+                 }
             }
-            navigator.clipboard.writeText(textToCopy).then(() => { showFeedbackOnCopyButton(copyBtn, 'OK!'); }).catch(err => { console.error('Errore durante la copia:', err); showFeedbackOnCopyButton(copyBtn, 'Err'); });
         });
     });
     </script>
 </body>
 </html>
+
