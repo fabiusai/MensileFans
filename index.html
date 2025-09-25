@@ -248,10 +248,14 @@
         }
         
         .chart-container {
-            overflow-x: auto;
+            width: 100%;
         }
 
         /* Stili per il grafico SVG */
+        .benchmark-chart {
+            width: 100%;
+            height: auto;
+        }
         .benchmark-chart .axis-label, .benchmark-chart .tick text {
             font-family: 'Nunito Sans', sans-serif;
             font-weight: 400;
@@ -436,10 +440,9 @@
             const margin = { top: 80, right: 40, bottom: 200, left: 140 }; // Aumentati margini per font più grandi
 
             const svg = container.append("svg")
-                .attr("width", width)
-                .attr("height", height)
+                .attr("width", "100%") // Adatta alla larghezza
+                .attr("height", "100%") // Adatta all'altezza
                 .attr("viewBox", `0 0 ${width} ${height}`)
-                .style("background-color", "transparent")
                 .attr("class", "benchmark-chart");
 
             const x = d3.scaleBand()
@@ -521,7 +524,7 @@
                 .attr("x2", margin.left + 450) 
                 .attr("y2", margin.top - 25)
                 .attr("stroke", "var(--chart-title-blue)")
-                .attr("stroke-width", 1);
+                .attr("stroke-width", 2);
         }
 
         function getStyledSvgString(svgElement) {
@@ -547,8 +550,8 @@
             try {
                 const svgData = getStyledSvgString(svgElement);
                 const canvas = document.createElement("canvas");
-                const width = +svgElement.getAttribute('width');
-                const height = +svgElement.getAttribute('height');
+                const width = 2300; // Usa la larghezza fissa per la copia
+                const height = 519; // Usa l'altezza fissa per la copia
                 
                 const scaleFactor = 2;
                 canvas.width = width * scaleFactor;
@@ -675,7 +678,7 @@
                         </div>
                         <div class="data-item">
                              <h3>Crescita Totale nel Mese</h3>
-                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
+                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5-.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
                             <p class="data-value positive" data-copy-target>+${formatNumber(totalGrowth)}</p>
                         </div>
                     </div>
