@@ -142,6 +142,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .data-item, .table-wrapper, .chart-wrapper {
@@ -252,16 +253,18 @@
         }
 
         /* Stili per il grafico SVG */
-        .benchmark-chart {
+        .benchmark-chart, .platform-chart {
             width: 100%;
             height: auto;
         }
-        .benchmark-chart .axis-label, .benchmark-chart .tick text {
+        .benchmark-chart .axis-label, .benchmark-chart .tick text,
+        .platform-chart .axis-label, .platform-chart .tick text {
             font-family: 'Nunito Sans', sans-serif;
             font-weight: 400;
             fill: var(--chart-text-grey);
         }
-        .benchmark-chart .bar-label {
+        .benchmark-chart .bar-label,
+        .platform-chart .bar-label {
             font-family: 'Nunito Sans', sans-serif;
             font-weight: 700;
             fill: var(--chart-title-blue);
@@ -269,6 +272,9 @@
         .benchmark-chart .grid-line {
             stroke: #e0e0e0;
             stroke-dasharray: 2,2;
+        }
+        .platform-chart .grid-line {
+            stroke: #cccccc; /* Rese più visibili */
         }
 
         #loader {
@@ -426,6 +432,89 @@
             }
             return n.toLocaleString('it-IT', options);
         }
+        
+        // <!-- NUOVA FUNZIONE AGGIUNTA -->
+        function createPlatformChart(containerId, data, title) {
+            const container = d3.select(containerId);
+            if (container.empty()) {
+                console.error(`Container con ID ${containerId} non trovato.`);
+                return;
+            }
+            container.selectAll("*").remove();
+            
+            // Trasforma i dati se necessario
+            const formattedData = data.map(d => ({ name: d[0], value: d[1] }));
+
+            const width = 800;
+            const height = 450;
+            const margin = { top: 20, right: 20, bottom: 40, left: 80 };
+
+            const svg = container.append("svg")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("class", "platform-chart");
+
+            const x = d3.scaleBand()
+                .domain(formattedData.map(d => d.name))
+                .range([margin.left, width - margin.right])
+                .padding(0.4);
+
+            const yMax = d3.max(formattedData, d => d.value);
+            const y = d3.scaleLinear()
+                .domain([0, yMax * 1.2])
+                .range([height - margin.bottom, margin.top]);
+
+            const xAxis = d3.axisBottom(x).tickSize(0);
+            const xAxisGroup = svg.append("g")
+                .attr("transform", `translate(0,${height - margin.bottom})`)
+                .call(xAxis);
+
+            // Rimuove le etichette dall'asse X come richiesto
+            xAxisGroup.selectAll("text").remove();
+            xAxisGroup.select(".domain").remove();
+
+            const yTicks = y.ticks(5).filter(tick => tick > 0);
+            const yAxis = d3.axisLeft(y)
+                .tickValues(yTicks)
+                .tickFormat(formatNumber)
+                .tickSize(-(width - margin.left - margin.right));
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(yAxis)
+                .call(g => g.select(".domain").remove())
+                .call(g => g.selectAll(".tick line").attr("class", "grid-line"))
+                .call(g => g.selectAll(".tick text")
+                    .attr("class", "axis-label")
+                    .attr("dx", "-0.5em")
+                    .style("font-size", "16px")
+                );
+
+            svg.append("g")
+                .selectAll("rect")
+                .data(formattedData)
+                .join("rect")
+                .attr("x", d => x(d.name))
+                .attr("y", d => y(d.value))
+                .attr("height", d => y(0) - y(d.value))
+                .attr("width", x.bandwidth())
+                .attr("fill", 'var(--chart-bar-blue)');
+
+            svg.append("g")
+                .selectAll("text")
+                .data(formattedData)
+                .join("text")
+                .attr("class", "bar-label")
+                .attr("x", d => x(d.name) + x.bandwidth() / 2)
+                .attr("y", d => y(d.value) - 12)
+                .attr("text-anchor", "middle")
+                .style("font-size", "20px")
+                .text(d => formatNumber(d.value));
+
+        }
+        // <!-- FINE NUOVA FUNZIONE -->
+
 
         function createBenchmarkChart(containerId, data, title) {
             const container = d3.select(containerId);
@@ -549,11 +638,13 @@
             showFeedbackOnCopyButton(button, 'Copiando...');
             try {
                 const svgData = getStyledSvgString(svgElement);
-                const canvas = document.createElement("canvas");
-                const width = 2300; // Usa la larghezza fissa per la copia
-                const height = 519; // Usa l'altezza fissa per la copia
+                // Utilizza il viewBox per determinare la dimensione
+                const viewBox = svgElement.getAttribute('viewBox').split(' ').map(Number);
+                const width = viewBox[2];
+                const height = viewBox[3];
                 
-                const scaleFactor = 2;
+                const scaleFactor = 2; // Aumenta la risoluzione
+                const canvas = document.createElement("canvas");
                 canvas.width = width * scaleFactor;
                 canvas.height = height * scaleFactor;
                 
@@ -636,6 +727,23 @@
             
             const perPiattaformaSheet = getSheetData(fansGlobaleWorkbook, 'Fans Poste per piattaforma');
             const platformData = perPiattaformaSheet.slice(findRowIndex(perPiattaformaSheet, 'facebook'));
+            
+            // <!-- NUOVO BLOCCO CODICE AGGIUNTO: Estrazione dati per la nuova tabella -->
+            const fansPosteCrescitaSheet = getSheetData(fansGlobaleWorkbook, 'Fans Poste Crescita');
+            let dailyGrowthData = [];
+            if(fansPosteCrescitaSheet.length > 13) {
+                 dailyGrowthData = fansPosteCrescitaSheet
+                    .slice(12, 43) // Corrisponde a A13:B43
+                    .filter(row => row && row[0] && (row[1] !== null && row[1] !== undefined)) // Ignora righe vuote
+                    .map(row => {
+                        // Formatta la data da numero seriale Excel a stringa gg/mm
+                        const date = XLSX.SSF.parse_date_code(row[0]);
+                        const formattedDate = `${String(date.d).padStart(2, '0')}/${String(date.m).padStart(2, '0')}`;
+                        return [formattedDate, row[1]];
+                    });
+            }
+            const dailyGrowthTableHTML = dailyGrowthData.length > 0 ? createTableHTML(dailyGrowthData, ['Giorno', 'Crescita'], 'Crescita giornaliera Fans') : '';
+            // <!-- FINE NUOVO BLOCCO -->
 
             const nameMaps = {            
                 fb: { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'DHL Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'ho. Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' },
@@ -664,6 +772,7 @@
             const linkedInData = competitorSheet.slice(2).map(r => cleanName(r, 'li')).sort((a,b) => b.value - a.value);
 
             const sections = {
+                // <!-- MODIFICA: Aggiunta la nuova tabella `dailyGrowthTableHTML` -->
                 'dati-generali': { title: 'Dati Generali Poste', content: `
                     <div class="data-grid">
                         <div class="data-item">
@@ -678,12 +787,23 @@
                         </div>
                         <div class="data-item">
                              <h3>Crescita Totale nel Mese</h3>
-                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5-.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
+                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
                             <p class="data-value positive" data-copy-target>+${formatNumber(totalGrowth)}</p>
                         </div>
                     </div>
+                    ${dailyGrowthTableHTML}
                 ` },
-                'dati-piattaforma': { title: 'Dati per Piattaforma', content: createTableHTML(platformData, ['Piattaforma', 'Followers'], 'Followers per Piattaforma') },
+                // <!-- MODIFICA: Aggiunto il contenitore per il nuovo grafico prima della tabella esistente -->
+                'dati-piattaforma': { title: 'Dati per Piattaforma', content: `
+                    <div class="chart-wrapper" style="margin-bottom: 1.5rem;">
+                         <div class="chart-controls">
+                             <button class="export-svg-btn" data-chart-id="piattaforma-chart-container" title="Esporta SVG">Esporta SVG</button>
+                             <button class="copy-svg-btn" data-chart-id="piattaforma-chart-container" title="Copia Grafico">Copia Grafico</button>
+                         </div>
+                         <div class="chart-container" id="piattaforma-chart-container"></div>
+                    </div>
+                    ${createTableHTML(platformData, ['Piattaforma', 'Followers'], 'Followers per Piattaforma')}
+                ` },
                 'benchmark-fb': { title: 'Benchmark Facebook', data: fbData, chartTitle: 'FACEBOOK' },
                 'benchmark-ig': { title: 'Benchmark Instagram', data: igData, chartTitle: 'INSTAGRAM' },
                 'benchmark-x': { title: 'Benchmark X', data: xData, chartTitle: 'X' },
@@ -721,15 +841,25 @@
                 if (id.startsWith('benchmark-')) {
                    createBenchmarkChart(`#${id}-chart-container`, section.data, section.chartTitle);
                 }
-
                 isFirst = false;
             }
+            
+            // <!-- NUOVO BLOCCO CODICE AGGIUNTO: Chiamata per renderizzare il nuovo grafico -->
+            createPlatformChart('#piattaforma-chart-container', platformData, 'FOLLOWERS PER PIATTAFORMA');
+            // <!-- FINE NUOVO BLOCCO -->
 
             reportContent.classList.remove('hidden');
         }
 
         function createTableHTML(data, headers, title) {
-            let tableRows = data.map(row => `<tr>${row.map((cell, index) => `<td>${index === 1 && typeof cell === 'number' ? formatNumberWithThousands(cell) : cell}</td>`).join('')}</tr>`).join('');
+            let tableRows = data.map(row => `<tr>${row.map(cell => {
+                const isNumeric = typeof cell === 'number';
+                // Formatta la cella per la visualizzazione se è un numero
+                const formattedCell = isNumeric ? formatNumberWithThousands(cell) : cell;
+                // Aggiunge un attributo dati con il valore grezzo se è un numero, per la funzionalità di copia
+                const rawValueAttr = isNumeric ? `data-raw-value="${cell}"` : '';
+                return `<td ${rawValueAttr}>${formattedCell}</td>`;
+            }).join('')}</tr>`).join('');
             return `
                 <div class="table-wrapper">
                     <button class="copy-button" title="Copia tabella"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
@@ -774,7 +904,11 @@
                     const rows = target.querySelectorAll('tr');
                     rows.forEach(row => {
                         const cells = row.querySelectorAll('th, td');
-                        const rowText = Array.from(cells).map(cell => cell.innerText.trim()).join('\t');
+                        const rowText = Array.from(cells).map(cell => {
+                            // Durante la copia, usa il valore numerico grezzo se disponibile, altrimenti il testo visualizzato.
+                            // Questo garantisce che Excel riconosca i numeri correttamente.
+                            return cell.dataset.rawValue || cell.innerText.trim();
+                        }).join('\t');
                         textToCopy += rowText + '\n';
                     });
                 } else {
@@ -809,4 +943,8 @@
     </script>
 </body>
 </html>
+
+
+
+
 
