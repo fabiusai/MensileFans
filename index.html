@@ -317,6 +317,23 @@
     </header>
 
     <main class="main-container">
+
+        <!-- INIZIO NUOVA SEZIONE WHATSAPP -->
+        <section class="upload-section" id="whatsapp-input-section">
+            <h2>Dati Canale WhatsApp (Opzionale)</h2>
+            <div class="grid md:grid-cols-2 gap-6 max-w-lg mx-auto">
+                <div>
+                    <label for="whatsapp-current" class="block text-sm font-medium text-gray-700 text-left mb-1">Iscritti mese corrente</label>
+                    <input type="number" id="whatsapp-current" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Es. 1500">
+                </div>
+                <div>
+                    <label for="whatsapp-previous" class="block text-sm font-medium text-gray-700 text-left mb-1">Iscritti mese precedente</label>
+                    <input type="number" id="whatsapp-previous" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Es. 1200">
+                </div>
+            </div>
+        </section>
+        <!-- FINE NUOVA SEZIONE WHATSAPP -->
+
         <section class="upload-section">
             <h2>Carica i file Excel</h2>
             <div id="drop-zone" class="drop-zone">
@@ -367,6 +384,11 @@
 
         async function handleFiles(files) {
             showLoader();
+            
+            const whatsappCurrent = parseInt(document.getElementById('whatsapp-current').value, 10) || 0;
+            const whatsappPrevious = parseInt(document.getElementById('whatsapp-previous').value, 10) || 0;
+            const whatsappData = { current: whatsappCurrent, previous: whatsappPrevious };
+
             const fileData = {};
             for (const file of files) {
                 try {
@@ -379,7 +401,7 @@
                 }
             }
             if (Object.keys(fileData).length > 0) {
-                processFiles(fileData);
+                processFiles(fileData, whatsappData);
             }
             hideLoader();
         }
@@ -433,7 +455,6 @@
             return n.toLocaleString('it-IT', options);
         }
         
-        // <!-- NUOVA FUNZIONE AGGIUNTA -->
         function createPlatformChart(containerId, data, title) {
             const container = d3.select(containerId);
             if (container.empty()) {
@@ -442,11 +463,11 @@
             }
             container.selectAll("*").remove();
             
-            // Trasforma i dati se necessario
             const formattedData = data.map(d => ({ name: d[0], value: d[1] }));
 
             const width = 800;
             const height = 450;
+            // <!-- MODIFICA: Ripristinato il margine inferiore originale -->
             const margin = { top: 20, right: 20, bottom: 40, left: 80 };
 
             const svg = container.append("svg")
@@ -458,7 +479,7 @@
             const x = d3.scaleBand()
                 .domain(formattedData.map(d => d.name))
                 .range([margin.left, width - margin.right])
-                .padding(0.4);
+                .padding(0.3);
 
             const yMax = d3.max(formattedData, d => d.value);
             const y = d3.scaleLinear()
@@ -470,7 +491,7 @@
                 .attr("transform", `translate(0,${height - margin.bottom})`)
                 .call(xAxis);
 
-            // Rimuove le etichette dall'asse X come richiesto
+            // <!-- MODIFICA: Rimosse nuovamente le etichette dall'asse X -->
             xAxisGroup.selectAll("text").remove();
             xAxisGroup.select(".domain").remove();
 
@@ -513,7 +534,6 @@
                 .text(d => formatNumber(d.value));
 
         }
-        // <!-- FINE NUOVA FUNZIONE -->
 
 
         function createBenchmarkChart(containerId, data, title) {
@@ -526,22 +546,22 @@
 
             const width = 2300;
             const height = 519;
-            const margin = { top: 80, right: 40, bottom: 200, left: 140 }; // Aumentati margini per font più grandi
+            const margin = { top: 80, right: 40, bottom: 200, left: 140 };
 
             const svg = container.append("svg")
-                .attr("width", "100%") // Adatta alla larghezza
-                .attr("height", "100%") // Adatta all'altezza
+                .attr("width", "100%")
+                .attr("height", "100%")
                 .attr("viewBox", `0 0 ${width} ${height}`)
                 .attr("class", "benchmark-chart");
 
             const x = d3.scaleBand()
                 .domain(data.map(d => d.name))
                 .range([margin.left, width - margin.right])
-                .padding(0.3); // Ridotto per allargare le barre e avvicinarle
+                .padding(0.3);
 
             const yMax = d3.max(data, d => d.value);
             const y = d3.scaleLinear()
-                .domain([0, yMax * 1.2]) // Aumentato yMax per più spazio in alto
+                .domain([0, yMax * 1.2])
                 .range([height - margin.bottom, margin.top]);
 
             const xAxis = d3.axisBottom(x).tickSize(0);
@@ -554,7 +574,7 @@
                 .attr("transform", "rotate(-45)")
                 .style("text-anchor", "end")
                 .attr("dy", "0.8em") 
-                .style("font-size", "26px"); // Ingrandito significativamente
+                .style("font-size", "26px");
             xAxisGroup.select(".domain").remove();
 
             const yTicks = y.ticks(5).filter(tick => tick > 0);
@@ -571,7 +591,7 @@
                 .call(g => g.selectAll(".tick text")
                     .attr("class", "axis-label")
                     .attr("dx", "-0.5em")
-                    .style("font-size", "26px") // Ingrandito significativamente
+                    .style("font-size", "26px")
                 );
 
             svg.append("g")
@@ -592,21 +612,19 @@
                 .attr("x", d => x(d.name) + x.bandwidth() / 2)
                 .attr("y", d => y(d.value) - 12)
                 .attr("text-anchor", "middle")
-                .style("font-size", "26px") // Ingrandito
+                .style("font-size", "26px")
                 .text(d => formatNumber(d.value));
 
-            // Titolo
             svg.append("text")
                 .attr("x", margin.left)
                 .attr("y", margin.top - 40)
                 .attr("text-anchor", "start")
-                .style("font-size", "32px") // Ingrandito
+                .style("font-size", "32px")
                 .style("font-weight", "bold")
                 .style("fill", "var(--chart-title-blue)")
                 .style("font-family", "var(--font-family)")
                 .text(title);
 
-            // Linea sotto il titolo
             svg.append("line")
                 .attr("x1", margin.left)
                 .attr("y1", margin.top - 25)
@@ -638,12 +656,11 @@
             showFeedbackOnCopyButton(button, 'Copiando...');
             try {
                 const svgData = getStyledSvgString(svgElement);
-                // Utilizza il viewBox per determinare la dimensione
                 const viewBox = svgElement.getAttribute('viewBox').split(' ').map(Number);
                 const width = viewBox[2];
                 const height = viewBox[3];
                 
-                const scaleFactor = 2; // Aumenta la risoluzione
+                const scaleFactor = 2;
                 const canvas = document.createElement("canvas");
                 canvas.width = width * scaleFactor;
                 canvas.height = height * scaleFactor;
@@ -700,7 +717,7 @@
             }
         }
         
-        function processFiles(fileData) {
+        function processFiles(fileData, whatsappData) {
             const fansGlobaleWorkbook = Object.values(fileData).find(wb => wb.SheetNames.includes('Total community size'));
             const competitorWorkbook = Object.values(fileData).find(wb => wb.SheetNames.includes('COMPETITORS'));
 
@@ -714,36 +731,54 @@
 
             const totalCommunitySheet = getSheetData(fansGlobaleWorkbook, 'Total community size');
             
-            let totalCommunitySize = 0, relativeChange = '0%', totalGrowth = 0;
+            let totalCommunitySize = 0, previousTotal = 0, totalGrowth = 0, relativeChange = '0.00%';
 
             const headerRowIndex = totalCommunitySheet.findIndex(row => row && String(row[2]).toLowerCase().includes('relative change'));
             if (headerRowIndex > -1 && totalCommunitySheet.length > headerRowIndex + 1) {
                 const dataRow = totalCommunitySheet[headerRowIndex + 1];
-                totalCommunitySize = Number(dataRow[0]);
-                const previousTotal = Number(dataRow[1]);
-                relativeChange = String(dataRow[2]);
+                totalCommunitySize = Number(dataRow[0]) || 0;
+                previousTotal = Number(dataRow[1]) || 0;
                 totalGrowth = totalCommunitySize - previousTotal;
             }
+            
+            // --- INIZIO LOGICA WHATSAPP ---
+            const whatsappGrowth = whatsappData.current - whatsappData.previous;
+
+            // Aggiorna i totali con i dati di WhatsApp
+            const finalTotalCommunitySize = totalCommunitySize + whatsappData.current;
+            const finalTotalGrowth = totalGrowth + whatsappGrowth;
+            const finalPreviousTotal = previousTotal + whatsappData.previous;
+
+            // Ricalcola la variazione percentuale complessiva
+            if (finalPreviousTotal > 0) {
+                const newRelativeChange = (finalTotalGrowth / finalPreviousTotal) * 100;
+                relativeChange = newRelativeChange.toFixed(2) + '%';
+            } else if (finalTotalCommunitySize > 0) {
+                relativeChange = '100.00%';
+            }
+            // --- FINE LOGICA WHATSAPP ---
             
             const perPiattaformaSheet = getSheetData(fansGlobaleWorkbook, 'Fans Poste per piattaforma');
             const platformData = perPiattaformaSheet.slice(findRowIndex(perPiattaformaSheet, 'facebook'));
             
-            // <!-- NUOVO BLOCCO CODICE AGGIUNTO: Estrazione dati per la nuova tabella -->
+            // Aggiungi WhatsApp ai dati della piattaforma se il valore è maggiore di zero
+            if(whatsappData.current > 0) {
+                platformData.push(['Whatsapp', whatsappData.current]);
+            }
+            
             const fansPosteCrescitaSheet = getSheetData(fansGlobaleWorkbook, 'Fans Poste Crescita');
             let dailyGrowthData = [];
             if(fansPosteCrescitaSheet.length > 13) {
                  dailyGrowthData = fansPosteCrescitaSheet
-                    .slice(12, 43) // Corrisponde a A13:B43
-                    .filter(row => row && row[0] && (row[1] !== null && row[1] !== undefined)) // Ignora righe vuote
+                    .slice(12, 43)
+                    .filter(row => row && row[0] && (row[1] !== null && row[1] !== undefined))
                     .map(row => {
-                        // Formatta la data da numero seriale Excel a stringa gg/mm
                         const date = XLSX.SSF.parse_date_code(row[0]);
                         const formattedDate = `${String(date.d).padStart(2, '0')}/${String(date.m).padStart(2, '0')}`;
                         return [formattedDate, row[1]];
                     });
             }
             const dailyGrowthTableHTML = dailyGrowthData.length > 0 ? createTableHTML(dailyGrowthData, ['Giorno', 'Crescita'], 'Crescita giornaliera Fans') : '';
-            // <!-- FINE NUOVO BLOCCO -->
 
             const nameMaps = {            
                 fb: { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'DHL Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'ho. Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' },
@@ -772,13 +807,12 @@
             const linkedInData = competitorSheet.slice(2).map(r => cleanName(r, 'li')).sort((a,b) => b.value - a.value);
 
             const sections = {
-                // <!-- MODIFICA: Aggiunta la nuova tabella `dailyGrowthTableHTML` -->
                 'dati-generali': { title: 'Dati Generali Poste', content: `
                     <div class="data-grid">
                         <div class="data-item">
                             <h3>Dimensione totale community</h3>
                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
-                            <p class="data-value" data-copy-target>${formatNumber(totalCommunitySize)}</p>
+                            <p class="data-value" data-copy-target>${formatNumber(finalTotalCommunitySize)}</p>
                         </div>
                         <div class="data-item">
                              <h3>Variazione vs Mese Prec.</h3>
@@ -788,12 +822,11 @@
                         <div class="data-item">
                              <h3>Crescita Totale nel Mese</h3>
                              <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
-                            <p class="data-value positive" data-copy-target>+${formatNumber(totalGrowth)}</p>
+                            <p class="data-value positive" data-copy-target>+${formatNumber(finalTotalGrowth)}</p>
                         </div>
                     </div>
                     ${dailyGrowthTableHTML}
                 ` },
-                // <!-- MODIFICA: Aggiunto il contenitore per il nuovo grafico prima della tabella esistente -->
                 'dati-piattaforma': { title: 'Dati per Piattaforma', content: `
                     <div class="chart-wrapper" style="margin-bottom: 1.5rem;">
                          <div class="chart-controls">
@@ -844,9 +877,7 @@
                 isFirst = false;
             }
             
-            // <!-- NUOVO BLOCCO CODICE AGGIUNTO: Chiamata per renderizzare il nuovo grafico -->
             createPlatformChart('#piattaforma-chart-container', platformData, 'FOLLOWERS PER PIATTAFORMA');
-            // <!-- FINE NUOVO BLOCCO -->
 
             reportContent.classList.remove('hidden');
         }
@@ -854,9 +885,7 @@
         function createTableHTML(data, headers, title) {
             let tableRows = data.map(row => `<tr>${row.map(cell => {
                 const isNumeric = typeof cell === 'number';
-                // Formatta la cella per la visualizzazione se è un numero
                 const formattedCell = isNumeric ? formatNumberWithThousands(cell) : cell;
-                // Aggiunge un attributo dati con il valore grezzo se è un numero, per la funzionalità di copia
                 const rawValueAttr = isNumeric ? `data-raw-value="${cell}"` : '';
                 return `<td ${rawValueAttr}>${formattedCell}</td>`;
             }).join('')}</tr>`).join('');
@@ -905,8 +934,6 @@
                     rows.forEach(row => {
                         const cells = row.querySelectorAll('th, td');
                         const rowText = Array.from(cells).map(cell => {
-                            // Durante la copia, usa il valore numerico grezzo se disponibile, altrimenti il testo visualizzato.
-                            // Questo garantisce che Excel riconosca i numeri correttamente.
                             return cell.dataset.rawValue || cell.innerText.trim();
                         }).join('\t');
                         textToCopy += rowText + '\n';
@@ -943,8 +970,4 @@
     </script>
 </body>
 </html>
-
-
-
-
 
