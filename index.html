@@ -126,6 +126,18 @@
             color: white;
         }
 
+        /* Stile specifico per il tasto Executive Summary */
+        .exec-summary-btn {
+            background-color: var(--primary-ui-yellow);
+            color: var(--primary-ui-blue);
+            border: 2px solid var(--primary-ui-yellow);
+        }
+        .exec-summary-btn:hover {
+            background-color: #e6c200; /* Giallo leggermente più scuro */
+            color: var(--primary-ui-blue);
+            border-color: #e6c200;
+        }
+
         .report-section {
             background-color: var(--card-background);
             padding: 1.5rem 2rem;
@@ -445,6 +457,29 @@
             return n.toLocaleString('it-IT');
         }
 
+        // Funzione dedicata per l'Executive Summary (es. 15,23K)
+        function formatSmartNumber(n) {
+            if (typeof n !== 'number') return "0";
+            
+            let value = n;
+            let suffix = '';
+
+            if (n >= 1000000) {
+                value = n / 1000000;
+                suffix = 'M';
+            } else if (n >= 1000) {
+                value = n / 1000;
+                suffix = 'K';
+            }
+
+            // Arrotonda a 2 decimali e rimuove zeri finali (es. 15.80 -> 15.8, 15.00 -> 15)
+            // parseFloat converte la stringa "15.80" nel numero 15.8
+            let formatted = parseFloat(value.toFixed(2));
+            
+            // Sostituisce il punto con la virgola per i decimali e aggiunge il suffisso
+            return String(formatted).replace('.', ',') + suffix;
+        }
+
         function formatNumberWithThousands(n, decimalPlaces = 0) {
             if (typeof n !== 'number') return String(n).replace('.',',');
             const options = {};
@@ -467,7 +502,6 @@
 
             const width = 800;
             const height = 450;
-            // <!-- MODIFICA: Ripristinato il margine inferiore originale -->
             const margin = { top: 20, right: 20, bottom: 40, left: 80 };
 
             const svg = container.append("svg")
@@ -491,7 +525,6 @@
                 .attr("transform", `translate(0,${height - margin.bottom})`)
                 .call(xAxis);
 
-            // <!-- MODIFICA: Rimosse nuovamente le etichette dall'asse X -->
             xAxisGroup.selectAll("text").remove();
             xAxisGroup.select(".domain").remove();
 
@@ -877,6 +910,59 @@
                 isFirst = false;
             }
             
+            // --- INIZIO NUOVA FUNZIONALITÀ EXECUTIVE SUMMARY ---
+            const execSummaryBtn = document.createElement('button');
+            execSummaryBtn.textContent = 'Executive Summary';
+            execSummaryBtn.className = 'nav-button exec-summary-btn'; 
+            execSummaryBtn.onclick = () => {
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const timestamp = `${now.getFullYear()}_${pad(now.getMonth()+1)}_${pad(now.getDate())}_${pad(now.getHours())}_${pad(now.getMinutes())}`;
+                const filename = `ES1_${timestamp}.json`;
+
+                // Helper per cercare il valore di una piattaforma in modo flessibile
+                const findVal = (keyword) => {
+                    // Cerca nelle righe di platformData se la prima colonna contiene la keyword
+                    const row = platformData.find(r => r[0] && String(r[0]).toLowerCase().includes(keyword.toLowerCase()));
+                    return row ? row[1] : 0;
+                };
+
+                // Helper specifico per trovare X / Twitter in modo più robusto
+                const findXValue = () => {
+                    const row = platformData.find(r => {
+                         if (!r[0]) return false;
+                         const name = String(r[0]).toLowerCase().trim();
+                         // Cerca 'twitter', oppure 'x' esatto, oppure 'x' seguito da spazio (es. 'X (Twitter)')
+                         return name.includes('twitter') || name === 'x' || name.startsWith('x ');
+                    });
+                    return row ? row[1] : 0;
+                };
+
+                // Costruzione dell'oggetto JSON secondo le specifiche
+                const exportData = {
+                    "Numero Complessivo Iscritti": formatSmartNumber(finalTotalCommunitySize),
+                    "Iscritti Facebook": formatSmartNumber(findVal('facebook')),
+                    "Iscritti X (Twitter)": formatSmartNumber(findXValue()), 
+                    "Iscritti Linkedin": formatSmartNumber(findVal('linkedin')),
+                    "Iscritti Instagram": formatSmartNumber(findVal('instagram')),
+                    "Iscritti Whatsapp": formatSmartNumber(findVal('whatsapp')),
+                    "Iscritti YouTube": formatSmartNumber(findVal('youtube'))
+                };
+
+                // Creazione e download del file
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+            buttonNav.appendChild(execSummaryBtn);
+            // --- FINE NUOVA FUNZIONALITÀ ---
+            
             createPlatformChart('#piattaforma-chart-container', platformData, 'FOLLOWERS PER PIATTAFORMA');
 
             reportContent.classList.remove('hidden');
@@ -912,6 +998,9 @@
         buttonNav.addEventListener('click', (e) => {
             const clickedButton = e.target.closest('.nav-button');
             if (!clickedButton) return;
+            // Se è il tasto executive summary non fare tab switching
+            if (clickedButton.classList.contains('exec-summary-btn')) return;
+            
             const sectionId = clickedButton.dataset.section;
             document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
             clickedButton.classList.add('active');
@@ -970,4 +1059,3 @@
     </script>
 </body>
 </html>
-
