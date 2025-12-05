@@ -457,27 +457,24 @@
             return n.toLocaleString('it-IT');
         }
 
-        // Funzione dedicata per l'Executive Summary (es. 15,23K)
+        // Funzione dedicata per l'Executive Summary
         function formatSmartNumber(n) {
             if (typeof n !== 'number') return "0";
             
-            let value = n;
-            let suffix = '';
-
             if (n >= 1000000) {
-                value = n / 1000000;
-                suffix = 'M';
+                // Per i milioni: mantiene logica esistente (fino a 2 decimali, rimuove zeri inutili)
+                let value = n / 1000000;
+                let formatted = parseFloat(value.toFixed(2));
+                return String(formatted).replace('.', ',') + 'M';
             } else if (n >= 1000) {
-                value = n / 1000;
-                suffix = 'K';
+                // Per le migliaia: arrotonda all'intero più vicino (es. 275.921 -> 276K)
+                let value = n / 1000;
+                let formatted = Math.round(value);
+                return String(formatted) + 'K';
             }
 
-            // Arrotonda a 2 decimali e rimuove zeri finali (es. 15.80 -> 15.8, 15.00 -> 15)
-            // parseFloat converte la stringa "15.80" nel numero 15.8
-            let formatted = parseFloat(value.toFixed(2));
-            
-            // Sostituisce il punto con la virgola per i decimali e aggiunge il suffisso
-            return String(formatted).replace('.', ',') + suffix;
+            // Per numeri piccoli (< 1000), restituisce il numero intero
+            return String(Math.round(n));
         }
 
         function formatNumberWithThousands(n, decimalPlaces = 0) {
