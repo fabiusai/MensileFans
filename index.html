@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Mensile Followers</title>
     <link rel="icon" href="favicon.ico">
-    <!-- Libreria per leggere i file Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Libreria D3.js per i grafici -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Nunito Sans (con peso regular 400 e 700) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,700&display=swap" rel="stylesheet">
@@ -330,7 +326,6 @@
 
     <main class="main-container">
 
-        <!-- INIZIO NUOVA SEZIONE WHATSAPP -->
         <section class="upload-section" id="whatsapp-input-section">
             <h2>Dati Canale WhatsApp (Opzionale)</h2>
             <div class="grid md:grid-cols-2 gap-6 max-w-lg mx-auto">
@@ -344,8 +339,6 @@
                 </div>
             </div>
         </section>
-        <!-- FINE NUOVA SEZIONE WHATSAPP -->
-
         <section class="upload-section">
             <h2>Carica i file Excel</h2>
             <div id="drop-zone" class="drop-zone">
@@ -453,6 +446,21 @@
 
             if (n >= 1000) {
                 return Math.round(n / 1000) + 'K';
+            }
+            return n.toLocaleString('it-IT');
+        }
+
+        // Funzione specifica per "Dimensione totale community" (2 decimali fissi + K/M)
+        function formatTotalCommunity(n) {
+            if (typeof n !== 'number') return String(n).replace('.',',');
+
+            if (n >= 1000000) {
+                // Esempio: 1250000 -> 1,25M
+                return (n / 1000000).toFixed(2).replace('.', ',') + 'M';
+            }
+            if (n >= 1000) {
+                // Esempio: 150500 -> 150,50K
+                return (n / 1000).toFixed(2).replace('.', ',') + 'K';
             }
             return n.toLocaleString('it-IT');
         }
@@ -842,7 +850,7 @@
                         <div class="data-item">
                             <h3>Dimensione totale community</h3>
                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
-                            <p class="data-value" data-copy-target>${formatNumber(finalTotalCommunitySize)}</p>
+                            <p class="data-value" data-copy-target>${formatTotalCommunity(finalTotalCommunitySize)}</p>
                         </div>
                         <div class="data-item">
                              <h3>Variazione vs Mese Prec.</h3>
