@@ -805,18 +805,166 @@
             }
             
             const fansPosteCrescitaSheet = getSheetData(fansGlobaleWorkbook, 'Fans Poste Crescita');
-            let dailyGrowthData = [];
+            
+            // Strutture dati
+            let dailyGrowthData = []; 
+            let currentMonthDetailed = []; 
+
             if(fansPosteCrescitaSheet.length > 13) {
-                 dailyGrowthData = fansPosteCrescitaSheet
+                 const rawRows = fansPosteCrescitaSheet
                     .slice(12, 43)
-                    .filter(row => row && row[0] && (row[1] !== null && row[1] !== undefined))
-                    .map(row => {
-                        const date = XLSX.SSF.parse_date_code(row[0]);
-                        const formattedDate = `${String(date.d).padStart(2, '0')}/${String(date.m).padStart(2, '0')}`;
-                        return [formattedDate, row[1]];
-                    });
+                    .filter(row => row && row[0] && (row[1] !== null && row[1] !== undefined));
+
+                 currentMonthDetailed = rawRows.map(row => {
+                     let dateObj;
+                     if (typeof row[0] === 'number') {
+                         const d = XLSX.SSF.parse_date_code(row[0]);
+                         dateObj = new Date(d.y, d.m - 1, d.d);
+                     } else {
+                         dateObj = new Date(row[0]);
+                     }
+                     if (isNaN(dateObj)) dateObj = new Date();
+
+                     const dStr = String(dateObj.getDate()).padStart(2, '0');
+                     const mStr = String(dateObj.getMonth() + 1).padStart(2, '0');
+                     
+                     return {
+                         date: dateObj,
+                         formattedDate: `${dStr}/${mStr}`,
+                         val: row[1],
+                         monthKey: `${dateObj.getFullYear()}_${mStr}`
+                     };
+                 });
+
+                 dailyGrowthData = currentMonthDetailed.map(item => [item.formattedDate, item.val]);
             }
-            const dailyGrowthTableHTML = dailyGrowthData.length > 0 ? createTableHTML(dailyGrowthData, ['Giorno', 'Crescita'], 'Crescita giornaliera Fans') : '';
+            
+            let dailyGrowthTableHTML = dailyGrowthData.length > 0 ? createTableHTML(dailyGrowthData, ['Giorno', 'Crescita'], 'Crescita giornaliera Fans') : '';
+
+            // --- LOGICA TABELLA ANNUALE ---
+            if (!window.exportExcelData) {
+                window.exportExcelData = function(filename, jsonDataEncoded) {
+                    try {
+                        const data = JSON.parse(decodeURIComponent(jsonDataEncoded));
+                        const ws = XLSX.utils.aoa_to_sheet(data);
+                        const wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, "Dati");
+                        XLSX.writeFile(wb, filename + ".xlsx");
+                    } catch(e) { alert("Errore export."); }
+                };
+            }
+
+            let monthlyTrendData = [];
+
+            if (currentMonthDetailed.length > 0) {
+                const annualFileKey = Object.keys(fileData).find(k => k.toLowerCase().startsWith('annuale') && (k.endsWith('.xlsx') || k.endsWith('.xls')));
+                let historicalRows = [];
+
+                if (annualFileKey) {
+                    const annualSheetName = fileData[annualFileKey].SheetNames[0];
+                    const rawAnnual = XLSX.utils.sheet_to_json(fileData[annualFileKey].Sheets[annualSheetName], { header: 1 });
+                    
+                    rawAnnual.forEach(row => {
+                        if (!row || row.length < 2) return;
+                        let dObj = null;
+                        if (typeof row[0] === 'number') {
+                            const di = XLSX.SSF.parse_date_code(row[0]);
+                            dObj = new Date(di.y, di.m - 1, di.d);
+                        } else if (typeof row[0] === 'string') {
+                            const parts = row[0].split('/');
+                            if (parts.length === 3) dObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                        }
+                        
+                        if (dObj && !isNaN(dObj.getTime())) {
+                             historicalRows.push({
+                                 date: dObj,
+                                 val: row[1],
+                                 monthKey: `${dObj.getFullYear()}_${String(dObj.getMonth() + 1).padStart(2, '0')}`
+                             });
+                        }
+                    });
+                }
+
+                const firstCurrentDate = currentMonthDetailed[0].date;
+                const refDateStartOfMonth = new Date(firstCurrentDate.getFullYear(), firstCurrentDate.getMonth(), 1);
+                const cutoffDate = new Date(refDateStartOfMonth);
+                cutoffDate.setMonth(cutoffDate.getMonth() - 11);
+
+                const validHistorical = historicalRows.filter(r => r.date >= cutoffDate && r.date < refDateStartOfMonth);
+                validHistorical.sort((a,b) => a.date - b.date);
+                
+                const fullYearData = [...validHistorical, ...currentMonthDetailed];
+                const groupedByMonth = {};
+                fullYearData.forEach(item => {
+                    if (!groupedByMonth[item.monthKey]) groupedByMonth[item.monthKey] = [];
+                    groupedByMonth[item.monthKey].push(item);
+                });
+
+                const sortedKeys = Object.keys(groupedByMonth).sort();
+                let totalFilename = "annuale_export";
+                if (sortedKeys.length > 0) totalFilename = `annuale_${sortedKeys[0]}-${sortedKeys[sortedKeys.length-1]}`;
+
+                const totalExportData = [['Data', 'Numero iscritti']];
+                fullYearData.forEach(d => {
+                     totalExportData.push([`${String(d.date.getDate()).padStart(2,'0')}/${String(d.date.getMonth()+1).padStart(2,'0')}/${d.date.getFullYear()}`, d.val]);
+                });
+
+                let innerAccordions = '';
+                sortedKeys.forEach(key => {
+                    const monthRows = groupedByMonth[key];
+                    
+                    // Prepara dati per il grafico annuale (prendi l'ultimo valore del mese)
+                    if (monthRows.length > 0) {
+                        const lastRow = monthRows[monthRows.length - 1];
+                        const d = lastRow.date;
+                        const mNames = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+                        const label = `${mNames[d.getMonth()]}-${String(d.getFullYear()).slice(-2)}`;
+                        monthlyTrendData.push([label, lastRow.val]);
+                    }
+
+                    const monthFilename = `followers_${key}`;
+                    const monthExportData = [['Data', 'Numero iscritti']];
+                    const tableRowsHTML = monthRows.map(r => {
+                        const fmt = `${String(r.date.getDate()).padStart(2,'0')}/${String(r.date.getMonth()+1).padStart(2,'0')}/${r.date.getFullYear()}`;
+                        monthExportData.push([fmt, r.val]);
+                        return `<tr><td>${fmt}</td><td>${formatNumberWithThousands(r.val)}</td></tr>`;
+                    }).join('');
+                    
+                    innerAccordions += `
+                        <details style="margin-bottom: 1rem; border-left: 4px solid var(--chart-bar-blue); padding-left: 1rem; background: #fff;">
+                            <summary style="cursor: pointer; font-weight: 600; color: #444; padding: 0.5rem 0;">${key.replace('_', '/')}</summary>
+                            <div style="margin-top: 0.5rem; padding-bottom: 0.5rem;">
+                                <button class="nav-button" style="font-size: 0.8rem; padding: 0.4rem 1rem; margin-bottom: 1rem;" 
+                                    onclick="window.exportExcelData('${monthFilename}', '${encodeURIComponent(JSON.stringify(monthExportData))}')">
+                                    Copia/Scarica Mese
+                                </button>
+                                <table><thead><tr><th>Data</th><th>Iscritti</th></tr></thead><tbody>${tableRowsHTML}</tbody></table>
+                            </div>
+                        </details>
+                    `;
+                });
+
+                // Trucco HTML per chiudere il container precedente e aprirne uno nuovo visibile
+                dailyGrowthTableHTML += `
+                    </div>
+                    </details>
+                    
+                    <details style="background: #f8f9fc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 2rem; margin-top: 1rem;">
+                        <summary style="cursor: pointer; font-weight: 700; color: var(--primary-ui-blue); outline: none;">Visualizza Crescita iscritti annuale</summary>
+                        <div style="margin-top: 1rem;">
+                            <div style="margin-bottom: 1.5rem; display: flex; justify-content: flex-end;">
+                                <button class="nav-button" style="background-color: var(--primary-ui-yellow); border-color: var(--primary-ui-yellow); color: var(--primary-ui-blue);" 
+                                    onclick="window.exportExcelData('${totalFilename}', '${encodeURIComponent(JSON.stringify(totalExportData))}')">
+                                    Scarica Excel Annuale
+                                </button>
+                            </div>
+                            ${innerAccordions}
+                        </div>
+                    </details>
+                    
+                    <details style="display:none"><div>
+                `;
+            }
 
             const nameMaps = {            
                 fb: { 'Vodafone it (https://www.facebook.com/vodafoneit)': 'Vodafone', 'TIM (https://www.facebook.com/TimOfficialPage)': 'Tim', 'WINDTRE (https://www.facebook.com/WINDTRE)': 'WindTre', 'PosteMobile (https://www.facebook.com/postemobile)': 'PosteMobile', 'Poste Italiane (https://www.facebook.com/PosteItaliane)': 'Poste Italiane', 'Frecciarossa (https://www.facebook.com/FrecciarossaOfficial)': 'Frecciarossa', 'Intesa Sanpaolo (https://www.facebook.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Revolut (https://www.facebook.com/revolutapp)': 'Revolut', 'Fastweb (https://www.facebook.com/Fastweb)': 'Fastweb', 'Deutsche Post und DHL (https://www.facebook.com/deutschepost)': 'Deutsche Post', 'iliad (https://www.facebook.com/iliadItalia)': 'Iliad', 'Eni (https://www.facebook.com/EniItalia)': 'Eni', 'Enel Group (https://www.facebook.com/EnelGroup)': 'Enel', 'Postepay (https://www.facebook.com/Postepay)': 'Postepay', 'Mooney Group (https://www.facebook.com/mooneygroup)': 'Mooney', 'DHL Express Italy (https://www.facebook.com/DHLExpressItaly)': 'DHL Italia', 'Royal Mail Stamps & Collectibles (https://www.facebook.com/RoyalMailStamps)': 'Royal Mail', 'HYPE (https://www.facebook.com/Hype.MoneyIsJustaTool)': 'Hype', 'ho. Mobile (https://www.facebook.com/homobile)': 'ho. Mobile', 'Banca Monte dei Paschi di Siena (https://www.facebook.com/bancamps)': 'Banca MPS', 'NeN (https://www.facebook.com/nen.energia)': 'NeN' },
@@ -844,6 +992,124 @@
             const competitorSheet = getSheetData(competitorWorkbook, 'COMPETITORS');
             const linkedInData = competitorSheet.slice(2).map(r => cleanName(r, 'li')).sort((a,b) => b.value - a.value);
 
+            function createTrendChart(containerId, data, title) {
+                const container = d3.select(containerId);
+                if (container.empty() || !data || data.length === 0) return;
+                container.selectAll("*").remove();
+
+                const width = 1580;
+                const height = 718;
+                const margin = { top: 120, right: 60, bottom: 200, left: 120 };
+
+                const svg = container.append("svg")
+                    .attr("width", "100%")
+                    .attr("height", "100%")
+                    .attr("viewBox", `0 0 ${width} ${height}`)
+                    .style("background", "#fff")
+                    .attr("class", "trend-chart");
+
+                const headerGroup = svg.append("g");
+                
+                headerGroup.append("text")
+                    .attr("x", 170)
+                    .attr("y", 95)
+                    .text(title || "ANDAMENTO CRESCITA")
+                    .attr("font-family", "var(--font-family)")
+                    .attr("font-size", "62px") 
+                    .attr("fill", "var(--chart-title-blue)")
+                    .style("text-transform", "uppercase");
+
+                headerGroup.append("line")
+                    .attr("x1", 165)
+                    .attr("y1", 110)
+                    .attr("x2", width - margin.right)
+                    .attr("y2", 110)
+                    .attr("stroke", "var(--chart-title-blue)")
+                    .attr("stroke-width", 3);
+
+                const xDomain = data.map(d => d[0]);
+                const yValues = data.map(d => d[1]);
+                const yMin = d3.min(yValues);
+                const yMax = d3.max(yValues);
+                const yPadding = (yMax - yMin) * 0.2;
+
+                // Modifica: Aggiunto padding(0.5) per distanziare la prima etichetta dall'asse
+                const x = d3.scalePoint()
+                    .domain(xDomain)
+                    .range([margin.left, width - margin.right])
+                    .padding(0.5);
+
+                const y = d3.scaleLinear()
+                    .domain([yMin - yPadding, yMax + yPadding])
+                    .range([height - margin.bottom, margin.top + 40]);
+
+                // Modifica: Formattazione asse Y in "K" con separatore e spazio (es. 3.150 K)
+                const yAxis = d3.axisLeft(y)
+                    .ticks(6)
+                    .tickFormat(d => {
+                        const val = Math.round(d / 1000);
+                        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' K';
+                    })
+                    .tickSize(-(width - margin.left - margin.right));
+
+                const yAxisGroup = svg.append("g")
+                    .attr("transform", `translate(${margin.left},0)`)
+                    .call(yAxis);
+                
+                yAxisGroup.select(".domain").remove();
+                yAxisGroup.selectAll(".tick line").attr("stroke", "#e0e0e0").attr("stroke-width", 2);
+                yAxisGroup.selectAll(".tick text").attr("fill", "#7b7b7a").attr("font-size", "30px").attr("dx", "-10");
+
+                // Rileva se i dati sono giornalieri (contengono /) o mensili
+                const isDaily = xDomain[0] && xDomain[0].includes('/');
+                const monthNames = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+
+                let xAxisObj = d3.axisBottom(x);
+                
+                if (isDaily) {
+                    const oddDays = xDomain.filter(d => parseInt(d.split('/')[0]) % 2 !== 0);
+                    xAxisObj = xAxisObj.tickValues(oddDays).tickFormat(d => {
+                        const parts = d.split('/');
+                        const day = parseInt(parts[0], 10);
+                        const month = monthNames[parseInt(parts[1], 10) - 1];
+                        return `${day}-${month}`;
+                    });
+                } else {
+                    // Per dati mensili (es. gen-25) mostra tutto
+                    xAxisObj = xAxisObj.tickFormat(d => d);
+                }
+
+                const xAxisGroup = svg.append("g")
+                    .attr("transform", `translate(0,${height - margin.bottom})`)
+                    .call(xAxisObj);
+
+                xAxisGroup.select(".domain").attr("stroke", "#e0e0e0").attr("stroke-width", 2);
+                xAxisGroup.selectAll(".tick line").remove();
+                
+                const xLabels = xAxisGroup.selectAll(".tick text")
+                    .attr("fill", "#7b7b7a")
+                    .attr("font-size", "39px");
+
+                // Modifica: Rotazione verticale applicata a TUTTE le etichette (giornaliere e annuali)
+                xLabels
+                    .attr("transform", "rotate(-90)")
+                    .attr("text-anchor", "end")
+                    .attr("dx", "-10")
+                    .attr("dy", "-5");
+
+                const line = d3.line()
+                    .x(d => x(d[0]))
+                    .y(d => y(d[1]))
+                    .curve(d3.curveMonotoneX);
+
+                svg.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke", "var(--chart-bar-blue)") 
+                    .attr("stroke-width", 10)
+                    .attr("d", line);
+            }
+
             const sections = {
                 'dati-generali': { title: 'Dati Generali Poste', content: `
                     <div class="data-grid">
@@ -859,11 +1125,33 @@
                         </div>
                         <div class="data-item">
                              <h3>Crescita Totale nel Mese</h3>
-                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
+                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5h3z"/></svg></button>
                             <p class="data-value positive" data-copy-target>+${formatNumber(finalTotalGrowth)}</p>
                         </div>
                     </div>
-                    ${dailyGrowthTableHTML}
+                    
+                    <details style="background: #f8f9fc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+                        <summary style="cursor: pointer; font-weight: 700; color: var(--primary-ui-blue); outline: none;">Visualizza tabella Crescita giornaliera</summary>
+                        <div style="margin-top: 1rem;">
+                            ${dailyGrowthTableHTML}
+                        </div>
+                    </details>
+
+                    <div class="chart-wrapper">
+                         <div class="chart-controls">
+                             <button class="export-svg-btn" data-chart-id="trend-chart-container" title="Esporta SVG">Esporta SVG</button>
+                             <button class="copy-svg-btn" data-chart-id="trend-chart-container" title="Copia Grafico">Copia Grafico</button>
+                         </div>
+                         <div class="chart-container" id="trend-chart-container"></div>
+                    </div>
+
+                    <div class="chart-wrapper" style="margin-top: 2rem;">
+                         <div class="chart-controls">
+                             <button class="export-svg-btn" data-chart-id="annual-trend-chart-container" title="Esporta SVG">Esporta SVG</button>
+                             <button class="copy-svg-btn" data-chart-id="annual-trend-chart-container" title="Copia Grafico">Copia Grafico</button>
+                         </div>
+                         <div class="chart-container" id="annual-trend-chart-container"></div>
+                    </div>
                 ` },
                 'dati-piattaforma': { title: 'Dati per Piattaforma', content: `
                     <div class="chart-wrapper" style="margin-bottom: 1.5rem;">
@@ -911,6 +1199,11 @@
                 
                 if (id.startsWith('benchmark-')) {
                    createBenchmarkChart(`#${id}-chart-container`, section.data, section.chartTitle);
+                } else if (id === 'dati-generali') {
+                    createTrendChart('#trend-chart-container', dailyGrowthData, "ANDAMENTO CRESCITA ULTIMO MESE");
+                    if (monthlyTrendData.length > 0) {
+                        createTrendChart('#annual-trend-chart-container', monthlyTrendData, "ANDAMENTO CRESCITA ULTIMI 12 MESI");
+                    }
                 }
                 isFirst = false;
             }
