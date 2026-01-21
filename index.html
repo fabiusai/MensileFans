@@ -455,12 +455,14 @@
             if (typeof n !== 'number') return String(n).replace('.',',');
 
             if (n >= 1000000) {
-                // Esempio: 1250000 -> 1,25M
-                return (n / 1000000).toFixed(2).replace('.', ',') + 'M';
+                // Esempio: 3.148.575 -> 3,14M (Tronca a 2 decimali senza arrotondare per eccesso)
+                const millions = Math.floor((n / 1000000) * 100) / 100;
+                return millions.toFixed(2).replace('.', ',') + 'M';
             }
             if (n >= 1000) {
-                // Esempio: 150500 -> 150,50K
-                return (n / 1000).toFixed(2).replace('.', ',') + 'K';
+                // Esempio: 150.500 -> 150,50K
+                const thousands = Math.floor((n / 1000) * 100) / 100;
+                return thousands.toFixed(2).replace('.', ',') + 'K';
             }
             return n.toLocaleString('it-IT');
         }
@@ -838,6 +840,33 @@
 
                  dailyGrowthData = currentMonthDetailed.map(item => [item.formattedDate, item.val]);
             }
+
+            // Logica distribuzione WhatsApp: Base fissa su tutti i giorni + Crescita progressiva cumulata
+            if (dailyGrowthData.length > 0 && (whatsappData.current > 0 || whatsappData.previous > 0)) {
+                const waGrowth = whatsappData.current - whatsappData.previous;
+                const waBase = whatsappData.previous;
+                const daysCount = dailyGrowthData.length;
+
+                dailyGrowthData = dailyGrowthData.map((row, index) => {
+                    // Calcola la porzione di crescita accumulata fino al giorno corrente (progressione lineare)
+                    // Formula: (CrescitaTotale * GiornoCorrente) / TotaleGiorni
+                    // Math.floor assicura numeri interi
+                    const accumulatedGrowth = Math.floor((waGrowth * (index + 1)) / daysCount);
+                    
+                    // Il valore del giorno è: Valore Originale Excel + Base WhatsApp (es. 54k) + Crescita WhatsApp accumulata fino a oggi
+                    const newVal = row[1] + waBase + accumulatedGrowth;
+
+                    return [row[0], newVal];
+                });
+
+                // Sincronizza currentMonthDetailed con i nuovi valori (Excel + WhatsApp)
+                // Questo passaggio è fondamentale affinché la tabella e il grafico annuale recepiscano le modifiche
+                currentMonthDetailed.forEach((item, i) => {
+                    if (dailyGrowthData[i]) {
+                        item.val = dailyGrowthData[i][1];
+                    }
+                });
+            }
             
             let dailyGrowthTableHTML = dailyGrowthData.length > 0 ? createTableHTML(dailyGrowthData, ['Giorno', 'Crescita'], 'Crescita giornaliera Fans') : '';
 
@@ -1110,8 +1139,21 @@
                     .attr("d", line);
             }
 
+            // Funzione per ricalcolare il report usando i dati WhatsApp attuali (chiusura su fileData corrente)
+            window.recalcWithWhatsapp = () => {
+                const wc = parseInt(document.getElementById('whatsapp-current').value, 10) || 0;
+                const wp = parseInt(document.getElementById('whatsapp-previous').value, 10) || 0;
+                processFiles(fileData, { current: wc, previous: wp });
+            };
+
             const sections = {
                 'dati-generali': { title: 'Dati Generali Poste', content: `
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                        <button class="nav-button" onclick="window.recalcWithWhatsapp()" style="background-color: #fff; color: var(--primary-ui-blue); border: 2px solid var(--primary-ui-blue); display: flex; align-items: center; gap: 0.5rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
+                            Aggiorna con dati WhatsApp
+                        </button>
+                    </div>
                     <div class="data-grid">
                         <div class="data-item">
                             <h3>Dimensione totale community</h3>
