@@ -330,12 +330,12 @@
             <h2>Dati Canale WhatsApp (Opzionale)</h2>
             <div class="grid md:grid-cols-2 gap-6 max-w-lg mx-auto">
                 <div>
-                    <label for="whatsapp-current" class="block text-sm font-medium text-gray-700 text-left mb-1">Iscritti mese corrente</label>
-                    <input type="number" id="whatsapp-current" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Es. 1500">
-                </div>
-                <div>
                     <label for="whatsapp-previous" class="block text-sm font-medium text-gray-700 text-left mb-1">Iscritti mese precedente</label>
                     <input type="number" id="whatsapp-previous" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Es. 1200">
+                </div>
+                <div>
+                    <label for="whatsapp-current" class="block text-sm font-medium text-gray-700 text-left mb-1">Iscritti mese corrente</label>
+                    <input type="number" id="whatsapp-current" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Es. 1500">
                 </div>
             </div>
         </section>
@@ -390,6 +390,54 @@
         async function handleFiles(files) {
             showLoader();
             
+            // 1. Identifica ed elabora eventuale file WhatsApp per precompilare i campi input
+            for (const file of files) {
+                if (file.name.toLowerCase().includes('whatsapp') && (file.name.endsWith('.xlsx') || file.name.endsWith('.csv') || file.name.endsWith('.xls'))) {
+                    try {
+                        const data = await file.arrayBuffer();
+                        const wb = XLSX.read(data);
+                        const sheet = wb.Sheets[wb.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                        
+                        // Cerca righe con date valide (colonna 0)
+                        const rows = json.filter(r => r && r[0] && (String(r[0]).match(/\d/) || typeof r[0] === 'number'));
+                        
+                        // Parsing date e valori per ordinamento
+                        const parsedRows = rows.map(r => {
+                            let dateVal = r[0];
+                            // Gestione data manuale per formato DD/MM/YYYY
+                            if(typeof dateVal === 'string' && dateVal.includes('/')) {
+                                const parts = dateVal.split('/');
+                                dateVal = new Date(parts[2], parts[1]-1, parts[0]);
+                            } else if (typeof dateVal === 'number') {
+                                // Gestione data seriale Excel
+                                dateVal = new Date((dateVal - (25567 + 2))*86400*1000); 
+                            } else {
+                                dateVal = new Date(dateVal);
+                            }
+
+                            let numVal = r[1];
+                            if (typeof numVal === 'string') {
+                                // Pulisce stringhe tipo "3.330.000 " togliendo punti e spazi
+                                numVal = parseInt(numVal.replace(/\./g, '').replace(/\s/g, ''), 10);
+                            }
+                            return { date: dateVal, val: numVal || 0 };
+                        }).sort((a,b) => a.date - b.date);
+
+                        // Se abbiamo almeno 2 record, prendiamo gli ultimi due
+                        if (parsedRows.length >= 2) {
+                            const prev = parsedRows[parsedRows.length - 2].val;
+                            const curr = parsedRows[parsedRows.length - 1].val;
+                            document.getElementById('whatsapp-previous').value = prev;
+                            document.getElementById('whatsapp-current').value = curr;
+                        }
+                    } catch (e) {
+                        console.error("Errore lettura file Whatsapp", e);
+                    }
+                }
+            }
+
+            // 2. Legge i valori aggiornati (o appena precompilati) dai campi input
             const whatsappCurrent = parseInt(document.getElementById('whatsapp-current').value, 10) || 0;
             const whatsappPrevious = parseInt(document.getElementById('whatsapp-previous').value, 10) || 0;
             const whatsappData = { current: whatsappCurrent, previous: whatsappPrevious };
@@ -841,26 +889,32 @@
                  dailyGrowthData = currentMonthDetailed.map(item => [item.formattedDate, item.val]);
             }
 
-            // Logica distribuzione WhatsApp: Base fissa su tutti i giorni + Crescita progressiva cumulata
+            // Logica distribuzione WhatsApp: Distribuzione uniforme con gestione resto finale
             if (dailyGrowthData.length > 0 && (whatsappData.current > 0 || whatsappData.previous > 0)) {
                 const waGrowth = whatsappData.current - whatsappData.previous;
                 const waBase = whatsappData.previous;
                 const daysCount = dailyGrowthData.length;
+                
+                // Calcolo quota giornaliera intera e residuo
+                const dailyQuota = Math.floor(waGrowth / daysCount);
+                const remainder = waGrowth % daysCount;
 
                 dailyGrowthData = dailyGrowthData.map((row, index) => {
-                    // Calcola la porzione di crescita accumulata fino al giorno corrente (progressione lineare)
-                    // Formula: (CrescitaTotale * GiornoCorrente) / TotaleGiorni
-                    // Math.floor assicura numeri interi
-                    const accumulatedGrowth = Math.floor((waGrowth * (index + 1)) / daysCount);
+                    // La crescita accumulata è la quota giornaliera * numero giorni trascorsi
+                    let accumulatedGrowth = dailyQuota * (index + 1);
                     
-                    // Il valore del giorno è: Valore Originale Excel + Base WhatsApp (es. 54k) + Crescita WhatsApp accumulata fino a oggi
+                    // Il residuo viene aggiunto interamente all'ultimo giorno
+                    if (index === daysCount - 1) {
+                        accumulatedGrowth += remainder;
+                    }
+                    
+                    // Il valore del giorno è: Valore Originale Excel + Base WhatsApp (mese prec) + Crescita WhatsApp accumulata fino a oggi
                     const newVal = row[1] + waBase + accumulatedGrowth;
 
                     return [row[0], newVal];
                 });
 
                 // Sincronizza currentMonthDetailed con i nuovi valori (Excel + WhatsApp)
-                // Questo passaggio è fondamentale affinché la tabella e il grafico annuale recepiscano le modifiche
                 currentMonthDetailed.forEach((item, i) => {
                     if (dailyGrowthData[i]) {
                         item.val = dailyGrowthData[i][1];
@@ -868,7 +922,26 @@
                 });
             }
             
-            let dailyGrowthTableHTML = dailyGrowthData.length > 0 ? createTableHTML(dailyGrowthData, ['Giorno', 'Crescita'], 'Crescita giornaliera Fans') : '';
+            // Preparazione dati per tabella con calcolo differenziale rispetto al giorno precedente
+            let tableDataWithDelta = [];
+            if (dailyGrowthData.length > 0) {
+                tableDataWithDelta = dailyGrowthData.map((row, index) => {
+                    const currentVal = row[1];
+                    let deltaStr = "";
+                    
+                    if (index === 0) {
+                        // Primo giorno: vuoto come richiesto per evitare loop o calcoli incerti
+                        deltaStr = "-";
+                    } else {
+                        const delta = currentVal - dailyGrowthData[index - 1][1];
+                        deltaStr = delta > 0 ? '+' + formatNumberWithThousands(delta) : formatNumberWithThousands(delta);
+                    }
+                    
+                    return [row[0], currentVal, deltaStr];
+                });
+            }
+            
+            let dailyGrowthTableHTML = dailyGrowthData.length > 0 ? createTableHTML(tableDataWithDelta, ['Giorno', 'Iscritti Totali', 'Incremento Giornaliero'], 'Crescita giornaliera Fans') : '';
 
             // --- LOGICA TABELLA ANNUALE ---
             if (!window.exportExcelData) {
