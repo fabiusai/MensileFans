@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "license": "MIT",
+    "description": "Social media logos encoded in Base64 for charts, dashboards and data visualizations",
+    "format": "data:image/png;base64"
+  },
+  "logos": {
+    "facebook": {
+      "name": "Facebook",
+      "brandColor": "#1877F2",
+      "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAACXBIWXMAAAsTAAALEwEAmpwYAAATOUlEQVR4nO2de4zcxn3Hvxxyubu399Sd7k73kE6WJetlSX7E8qNOmliBm8KJk7QIUrtF2wBFYaBBiyB/uOgfdf9oAhRpDAgI2qRADP+RpkXtGGjitGiNpkhlyLEjObYkW5ItyTq9TtLdre61Ly45xQw55JC7e6fj7YPc3O9s7XKHnPnNfDi/H+dJ5b3zc2CiAEg..."
+    },
+    "instagram": {
+      "name": "Instagram",
+      "brandColor": "#E4405F",
+      "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAA2B0lEQVR4nM19CZBeV3Xmve+9f+n/7251t6SW1JK1S7YlLzLel5jByDYQPBDMEkIITGEGZoAQIDBFCMlAUanMQjEwGaDYhjXGYWwXMIYK2ME2YGzL2JaxsSxba0uWWi2ppV7+9b17p85yl7f8rbZnMuHRyH..."
+    },
+    "youtube": {
+      "name": "YouTube",
+      "brandColor": "#FF0000",
+      "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAQ3ElEQVR4nO1dC5AUxRn+e3Z294A74Tjg4HiIlBpjhDM+qsBHovhKCUaNLwiWWlFTMSmjplKmtBJRE6tSSUylfMZHfFEhYmKsUIlGrRgh5StSQQ4RFEEBecjjDgHh7na3/9RMz/T09PTMzuz27N2u/FW3N9vT093z9bf//8/fjyG..."
+    },
+    "whatsapp": {
+      "name": "WhatsApp",
+      "brandColor": "#25D366",
+      "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAdwElEQVR4nO2deXgc1ZXo7629V7W61a1dsiVZlmx5lfcNbINDbCAJy8TECSSE8GbyYICQ98KSl5AZvkmG5+RlI3lZYPhIPgLYDASTYGxsg22MF7zbkm0t1taytlar96WW+76q6m5Vd1fLUnfJ+DE6f9ilqlun7v31rbuce84tiBACGaTX52..."
+    },
+    "x": {
+      "name": "X",
+      "brandColor": "#000000",
+      "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAXjklEQVR4nO1dCXgURdr++prJPZkcnEFRDiUEDIIEkMMVDTdoEEMIIiAqKoesrqsICsohv8cCIosXCMQgR4SEAIZjEbxIWATkCK4IEhUDJIQc5Jg+6n+qunuu7kRIuicgeZ+G6XRXVVe/XfNW1dffV0MhhKAaHPz+0I4d//nhyJG8334vunSphpR1AUVRcsnkHwKgXB9yimquq61PdTWU5OPq2RoyKgnVKzs/1b+U0/JfkiTRFG0LCW4RFRUT3W7AwH69+/Sq9jZ1K7c5PfPD5Z/s2be/tLySoSmrhbOwrElEI/kG5LKdjLvz4nm7rloghOSn4Z5LZo0CJMlPDEkKO24sKQfkJ+vGPs6oEiIXqzx0taIUfmhqaWQHH3EAOEgKpnOXuElPTxw77pE/J7qwsHDKlOdS07dS..."
+    }
+  }
+}
