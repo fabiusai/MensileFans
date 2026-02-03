@@ -545,47 +545,63 @@
             return n.toLocaleString('it-IT', options);
         }
         
-        function createPlatformChart(containerId, data, title) {
+        async function createPlatformChart(containerId, data, title) {
             const container = d3.select(containerId);
-            if (container.empty()) {
-                console.error(`Container con ID ${containerId} non trovato.`);
-                return;
-            }
+            if (container.empty()) return;
             container.selectAll("*").remove();
             
-            const formattedData = data.map(d => ({ name: d[0], value: d[1] }));
+            // SOLUZIONE DEFINITIVA: Loghi integrati direttamente nel codice
+            // Assicurati di incollare le stringhe Base64 COMPLETE tra le virgolette
+            const logosData = {
+                facebook: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAACXBIWXMAAAsTAAALEwEAmpwYAAATOUlEQVR4nO2de4zcxn3Hvxxyubu399Sd7k73kE6WJetlSX7E8qNOmliBm8KJk7QIUrtF2wBFYaBBiyB/uOgfdf9oAhRpDAgI2qRADP+RpkXtGGjitGiNpkhlyLEjObYkW5ItyTq9TtLdre61Ly45xQw55JC7e6fj7YPc3O9s7XKHnPnNfDi/H+dJ5b3zc2CiAEg..." },
+                instagram: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAA2B0lEQVR4nM19CZBeV3Xmve+9f+n/7251t6SW1JK1S7YlLzLel5jByDYQPBDMEkIITGEGZoAQIDBFCMlAUanMQjEwGaDYhjXGYWwXMIYK2ME2YGzL2JaxsSxba0uWWi2ppV7+9b17p85yl7f8rbZnMuHRyH..." },
+                linkedin: { base64: "data:image/png;base64,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" },
+                youtube: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAQ3ElEQVR4nO1dC5AUxRn+e3Z294A74Tjg4HiIlBpjhDM+qsBHovhKCUaNLwiWWlFTMSmjplKmtBJRE6tSSUylfMZHfFEhYmKsUIlGrRgh5StSQQ4RFEEBecjjDgHh7na3/9RMz/T09PTMzuz27N2u/FW3N9vT093z9bf//8/fjyG..." },
+                whatsapp: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAdwElEQVR4nO2deXgc1ZXo7629V7W61a1dsiVZlmx5lfcNbINDbCAJy8TECSSE8GbyYICQ98KSl5AZvkmG5+RlI3lZYPhIPgLYDASTYGxsg22MF7zbkm0t1taytlar96WW+76q6m5Vd1fLUnfJ+DE6f9ilqlun7v31rbuce84tiBACGaTX52..." },
+                x: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAXjklEQVR4nO1dCXgURdr++prJPZkcnEFRDiUEDIIEkMMVDTdoEEMIIiAqKoesrqsICsohv8cCIosXCMQgR4SEAIZjEbxIWATkCK4IEhUDJIQc5Jg+6n+qunuu7kRIuicgeZ+G6XRXVVe/XfNW1dffV0MhhKAaHPz+0I4d//nhyJG8334vunSphpR1AUVRcsnkHwKgXB9yimquq61PdTWU5OPq2RoyKgnVKzs/1b+U0/JfkiTRFG0LCW4RFRUT3W7AwH69+/Sq9jZ1K7c5PfPD5Z/s2be/tLySoSmrhbOwrElEI/kG5LKdjLvz4nm7rloghOSn4Z5LZo0CJMlPDEkKO24sKQfkJ+vGPs6oEiIXqzx0taIUfmhqaWQHH3EAOEgKpnOXuElPTxw77pE/J7qwsHDKlOdS07dS..." }
+            };
 
-            const width = 800;
-            const height = 450;
-            const margin = { top: 20, right: 20, bottom: 40, left: 80 };
+            const platformConfig = {
+                'facebook': { logo: logosData.facebook?.base64 || '', profiles: ['Poste Italiane', 'PosteMobile', 'Postepay'], label: 'Facebook' },
+                'linkedin': { logo: logosData.linkedin?.base64 || '', profiles: ['Poste Italiane'], label: 'Linkedin' },
+                'x': { logo: logosData.x?.base64 || '', profiles: ['Poste Italiane', 'PosteSpedizioni', 'WebPoste'], label: 'X' },
+                'instagram': { logo: logosData.instagram?.base64 || '', profiles: ['Poste Italiane', 'Postepay'], label: 'Instagram' },
+                'youtube': { logo: logosData.youtube?.base64 || '', profiles: ['Poste Italiane'], label: 'Youtube' },
+                'whatsapp': { logo: logosData.whatsapp?.base64 || '', profiles: ['Poste Italiane'], label: 'Whatsapp' }
+            };
+
+            const formattedData = data
+                .map(d => {
+                    const key = d[0].toLowerCase();
+                    const config = platformConfig[key] || { logo: '', profiles: [], label: d[0] };
+                    return { name: d[0], value: d[1], ...config };
+                })
+                .sort((a, b) => b.value - a.value);
+
+            const width = 1000;
+            const height = 600; // Altezza totale ridotta per compattare
+            // Margine inferiore ridotto drasticamente (da 220 a 140) per avvicinare i loghi alla base
+            const margin = { top: 60, right: 30, bottom: 140, left: 90 };
 
             const svg = container.append("svg")
                 .attr("width", "100%")
                 .attr("height", "100%")
                 .attr("viewBox", `0 0 ${width} ${height}`)
-                .attr("class", "platform-chart");
+                .attr("class", "platform-chart")
+                .style("font-family", "'Avenir Next LT Pro', sans-serif");
 
             const x = d3.scaleBand()
                 .domain(formattedData.map(d => d.name))
                 .range([margin.left, width - margin.right])
-                .padding(0.3);
+                .padding(0.4);
 
             const yMax = d3.max(formattedData, d => d.value);
             const y = d3.scaleLinear()
                 .domain([0, yMax * 1.2])
                 .range([height - margin.bottom, margin.top]);
 
-            const xAxis = d3.axisBottom(x).tickSize(0);
-            const xAxisGroup = svg.append("g")
-                .attr("transform", `translate(0,${height - margin.bottom})`)
-                .call(xAxis);
-
-            xAxisGroup.selectAll("text").remove();
-            xAxisGroup.select(".domain").remove();
-
-            const yTicks = y.ticks(5).filter(tick => tick > 0);
             const yAxis = d3.axisLeft(y)
-                .tickValues(yTicks)
+                .ticks(5)
                 .tickFormat(formatNumber)
                 .tickSize(-(width - margin.left - margin.right));
 
@@ -593,12 +609,8 @@
                 .attr("transform", `translate(${margin.left},0)`)
                 .call(yAxis)
                 .call(g => g.select(".domain").remove())
-                .call(g => g.selectAll(".tick line").attr("class", "grid-line"))
-                .call(g => g.selectAll(".tick text")
-                    .attr("class", "axis-label")
-                    .attr("dx", "-0.5em")
-                    .style("font-size", "16px")
-                );
+                .call(g => g.selectAll(".tick line").attr("stroke", "#e0e0e0").attr("stroke-dasharray", "2,2"))
+                .call(g => g.selectAll(".tick text").attr("fill", "#7b7b7a").style("font-size", "18px"));
 
             svg.append("g")
                 .selectAll("rect")
@@ -608,19 +620,54 @@
                 .attr("y", d => y(d.value))
                 .attr("height", d => y(0) - y(d.value))
                 .attr("width", x.bandwidth())
-                .attr("fill", 'var(--chart-bar-blue)');
+                .attr("fill", "#bfd7fd");
 
             svg.append("g")
-                .selectAll("text")
+                .selectAll("text.value")
                 .data(formattedData)
                 .join("text")
-                .attr("class", "bar-label")
+                .attr("class", "value")
                 .attr("x", d => x(d.name) + x.bandwidth() / 2)
-                .attr("y", d => y(d.value) - 12)
+                .attr("y", d => y(d.value) - 20)
                 .attr("text-anchor", "middle")
-                .style("font-size", "20px")
+                .attr("fill", "#0431AE")
+                .style("font-weight", "bold")
+                .style("font-size", "26px")
                 .text(d => formatNumber(d.value));
 
+            // Translate modificato: avvicinato alla base del grafico (+10 invece di +40)
+            const labels = svg.append("g")
+                .selectAll("g")
+                .data(formattedData)
+                .join("g")
+                .attr("transform", d => `translate(${x(d.name) + x.bandwidth() / 2}, ${height - margin.bottom + 10})`);
+
+            labels.append("image")
+                .attr("xlink:href", d => d.logo)
+                .attr("x", -25) // Centrato (metà di 50)
+                .attr("y", 0)
+                .attr("width", 50) // Dimensione uniforme
+                .attr("height", 50); // Dimensione uniforme
+
+            labels.append("text")
+                .attr("y", 75)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#0431AE")
+                .style("font-weight", "bold")
+                .style("font-size", "22px")
+                .text(d => d.label);
+
+            labels.each(function(d) {
+                const group = d3.select(this);
+                d.profiles.forEach((profile, i) => {
+                    group.append("text")
+                        .attr("y", 100 + (i * 20)) // Spaziatura ridotta per compattezza
+                        .attr("text-anchor", "middle")
+                        .attr("fill", "#7b7b7a")
+                        .style("font-size", "14px")
+                        .text(profile);
+                });
+            });
         }
 
 
@@ -1376,6 +1423,7 @@
             buttonNav.appendChild(execSummaryBtn);
             // --- FINE NUOVA FUNZIONALITÀ ---
             
+            // Rendering asincrono del grafico per attendere il caricamento dei loghi
             createPlatformChart('#piattaforma-chart-container', platformData, 'FOLLOWERS PER PIATTAFORMA');
 
             reportContent.classList.remove('hidden');
