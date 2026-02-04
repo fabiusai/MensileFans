@@ -288,7 +288,7 @@
                 };
             }).sort((a, b) => b.value - a.value);
 
-            const width = 1000; const height = 600; 
+            const width = 1000; const height = 800; 
             const margin = { top: 60, right: 30, bottom: 140, left: 90 };
 
             const svg = container.append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`).attr("class", "platform-chart").style("font-family", "'Avenir Next LT Pro', sans-serif");
@@ -307,7 +307,7 @@
             labels.each(function(d) {
                 const group = d3.select(this);
                 d.profiles.forEach((profile, i) => {
-                    group.append("text").attr("y", 100 + (i * 20)).attr("text-anchor", "middle").attr("fill", "#7b7b7a").style("font-size", "14px").text(profile);
+                    group.append("text").attr("y", 100 + (i * 24)).attr("text-anchor", "middle").attr("fill", "#7b7b7a").style("font-size", "18px").text(profile);
                 });
             });
         }
