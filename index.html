@@ -14,16 +14,11 @@
 
     <style>
         :root {
-            /* Colori UI Principali (Header, Bottoni, etc) */
             --primary-ui-blue: #004282;
             --primary-ui-yellow: #ffd400;
-            
-            /* Colori Grafico dal UI Kit */
             --chart-title-blue: #0431AE;
             --chart-bar-blue: #bfd7fd;
             --chart-text-grey: #7b7b7a;
-            
-            /* Colori Generali */
             --background-color: #f4f7fa;
             --text-color: #333333;
             --card-background: #ffffff;
@@ -31,301 +26,65 @@
             --font-family: 'Nunito Sans', 'Helvetica Neue', Arial, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-family);
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        header {
-            background-color: var(--primary-ui-blue);
-            color: white;
-            padding: 1.5rem 2rem;
-            text-align: center;
-            border-bottom: 5px solid var(--primary-ui-yellow);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--background-color); color: var(--text-color); line-height: 1.6; }
+        header { background-color: var(--primary-ui-blue); color: white; padding: 1.5rem 2rem; text-align: center; border-bottom: 5px solid var(--primary-ui-yellow); }
+        .main-container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+        .upload-section { background-color: var(--card-background); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); text-align: center; margin-bottom: 2rem; }
+        .upload-section h2 { margin-bottom: 1.5rem; font-size: 1.5rem; color: var(--primary-ui-blue); }
         
-        .main-container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .upload-section {
-            background-color: var(--card-background);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .upload-section h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            color: var(--primary-ui-blue);
-        }
-
-        .drop-zone {
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 3rem 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
+        .drop-zone { border: 2px dashed var(--border-color); border-radius: 8px; padding: 3rem 1rem; cursor: pointer; transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .drop-zone.dragover { background-color: #e9f5ff; border-color: var(--primary-ui-blue); }
+        .drop-zone p { margin: 0; font-size: 1.1rem; color: #666; }
+        .file-input { display: none; }
         
-        .drop-zone.dragover {
-            background-color: #e9f5ff;
-            border-color: var(--primary-ui-blue);
-        }
+        .button-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; }
+        .nav-button { background-color: #fff; color: var(--primary-ui-blue); border: 2px solid var(--primary-ui-blue); padding: 0.6rem 1.2rem; border-radius: 9999px; cursor: pointer; font-weight: 700; transition: background-color 0.3s, color 0.3s; font-family: var(--font-family); font-size: 0.9rem; }
+        .nav-button:hover, .nav-button.active { background-color: var(--primary-ui-blue); color: white; }
+        .exec-summary-btn { background-color: var(--primary-ui-yellow); color: var(--primary-ui-blue); border: 2px solid var(--primary-ui-yellow); }
+        .exec-summary-btn:hover { background-color: #e6c200; border-color: #e6c200; }
 
-        .drop-zone p {
-            margin: 0;
-            font-size: 1.1rem;
-            color: #666;
-        }
+        .report-section { background-color: var(--card-background); padding: 1.5rem 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); margin-bottom: 2rem; }
+        .hidden { display: none; }
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .data-item, .table-wrapper, .chart-wrapper { background-color: #f8f9fc; padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); position: relative; }
+        .data-item h3, .table-wrapper h3 { font-size: 1.1rem; color: var(--primary-ui-blue); margin-bottom: 1rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        .data-value { font-size: 2.2rem; font-weight: 700; color: var(--primary-ui-blue); }
+        .positive { color: #28a745; } .negative { color: #dc3545; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+        th { background-color: #eef2f7; font-weight: 700; color: var(--primary-ui-blue); }
+        tr:nth-child(even) { background-color: #fdfdfd; }
+
+        .copy-button, .export-svg-btn, .copy-svg-btn { position: absolute; top: 10px; right: 10px; background-color: #e9ecef; border: 1px solid #ced4da; color: #495057; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s; }
+        .copy-button:hover, .export-svg-btn:hover, .copy-svg-btn:hover { background-color: #dee2e6; }
         
-        .file-input {
-            display: none;
-        }
+        .chart-controls { position: static; display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem; }
+        .chart-controls .export-svg-btn, .chart-controls .copy-svg-btn { position: static; width: auto; height: auto; border-radius: 20px; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600; }
+        .chart-controls .copy-svg-btn { background-color: var(--primary-ui-blue); color: white; border-color: var(--primary-ui-blue); }
         
-        .button-nav {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-        }
+        .chart-container { width: 100%; }
+        .benchmark-chart .axis-label, .platform-chart .axis-label { font-family: 'Nunito Sans', sans-serif; font-weight: 400; fill: var(--chart-text-grey); }
+        .benchmark-chart .bar-label, .platform-chart .bar-label { font-family: 'Nunito Sans', sans-serif; font-weight: 700; fill: var(--chart-title-blue); }
+        .benchmark-chart .grid-line, .platform-chart .grid-line { stroke: #e0e0e0; stroke-dasharray: 2,2; }
 
-        .nav-button {
-            background-color: #fff;
-            color: var(--primary-ui-blue);
-            border: 2px solid var(--primary-ui-blue);
-            padding: 0.6rem 1.2rem;
-            border-radius: 9999px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: background-color 0.3s, color 0.3s;
-            font-family: var(--font-family);
-            font-size: 0.9rem;
-        }
-
-        .nav-button:hover, .nav-button.active {
-            background-color: var(--primary-ui-blue);
-            color: white;
-        }
-
-        /* Stile specifico per il tasto Executive Summary */
-        .exec-summary-btn {
-            background-color: var(--primary-ui-yellow);
-            color: var(--primary-ui-blue);
-            border: 2px solid var(--primary-ui-yellow);
-        }
-        .exec-summary-btn:hover {
-            background-color: #e6c200; /* Giallo leggermente più scuro */
-            color: var(--primary-ui-blue);
-            border-color: #e6c200;
-        }
-
-        .report-section {
-            background-color: var(--card-background);
-            padding: 1.5rem 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .data-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .data-item, .table-wrapper, .chart-wrapper {
-            background-color: #f8f9fc;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); z-index: 9999; justify-content: center; align-items: center; }
+        .spinner { border: 8px solid #f3f3f3; border-top: 8px solid var(--primary-ui-blue); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .data-item h3, .table-wrapper h3 {
-            font-size: 1.1rem;
-            color: var(--primary-ui-blue);
-            margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .data-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--primary-ui-blue);
-        }
-
-        .data-change {
-            font-size: 1rem;
-            font-weight: 700;
-        }
-
-        .positive { color: #28a745; }
-        .negative { color: #dc3545; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 0.8rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.95rem;
-        }
-
-        th {
-            background-color: #eef2f7;
-            font-weight: 700;
-            color: var(--primary-ui-blue);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-        
-        tr:nth-child(even) {
-            background-color: #fdfdfd;
-        }
-
-        .copy-button, .export-svg-btn, .copy-svg-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #e9ecef;
-            border: 1px solid #ced4da;
-            color: #495057;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-        
-        .copy-button:hover, .export-svg-btn:hover, .copy-svg-btn:hover {
-            background-color: #dee2e6;
-        }
-
-        .chart-controls {
-            position: static;
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .chart-controls .export-svg-btn, .chart-controls .copy-svg-btn {
-            position: static;
-            width: auto;
-            height: auto;
-            border-radius: 20px;
-            padding: 0.5rem 1rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        .chart-controls .copy-svg-btn {
-           background-color: var(--primary-ui-blue);
-           color: white;
-           border-color: var(--primary-ui-blue);
-        }
-        .chart-controls .copy-svg-btn:hover {
-            background-color: #003366;
-        }
-        
-        .chart-container {
-            width: 100%;
-        }
-
-        /* Stili per il grafico SVG */
-        .benchmark-chart, .platform-chart {
-            width: 100%;
-            height: auto;
-        }
-        .benchmark-chart .axis-label, .benchmark-chart .tick text,
-        .platform-chart .axis-label, .platform-chart .tick text {
-            font-family: 'Nunito Sans', sans-serif;
-            font-weight: 400;
-            fill: var(--chart-text-grey);
-        }
-        .benchmark-chart .bar-label,
-        .platform-chart .bar-label {
-            font-family: 'Nunito Sans', sans-serif;
-            font-weight: 700;
-            fill: var(--chart-title-blue);
-        }
-        .benchmark-chart .grid-line {
-            stroke: #e0e0e0;
-            stroke-dasharray: 2,2;
-        }
-        .platform-chart .grid-line {
-            stroke: #cccccc; /* Rese più visibili */
-        }
-
-        #loader {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.7);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .spinner {
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid var(--primary-ui-blue);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
+        #logos-status { margin-top: 1rem; font-size: 0.9rem; font-weight: bold; color: #28a745; display: none; }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-    </div>
+    <div id="loader"><div class="spinner"></div></div>
 
     <header>
         <h1 class="text-3xl font-bold">Report Mensile Followers</h1>
     </header>
 
     <main class="main-container">
-
         <section class="upload-section" id="whatsapp-input-section">
             <h2>Dati Canale WhatsApp (Opzionale)</h2>
             <div class="grid md:grid-cols-2 gap-6 max-w-lg mx-auto">
@@ -339,11 +98,13 @@
                 </div>
             </div>
         </section>
+        
         <section class="upload-section">
-            <h2>Carica i file Excel</h2>
+            <h2>Carica i file Excel e i Loghi (JSON)</h2>
             <div id="drop-zone" class="drop-zone">
-                <input type="file" id="file-input" multiple class="file-input" accept=".xlsx, .xls, .csv">
-                <p>Trascina i file qui o clicca per selezionarli</p>
+                <input type="file" id="file-input" multiple class="file-input" accept=".xlsx, .xls, .csv, .json">
+                <p>Trascina qui i file Excel e il file 'loghi_ok.json'</p>
+                <div id="logos-status">✓ File loghi caricato correttamente</div>
             </div>
         </section>
 
@@ -354,6 +115,9 @@
     </main>
 
     <script>
+    let uploadedLogos = null; 
+    let currentPlatformData = null; 
+
     document.addEventListener('DOMContentLoaded', () => {
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
@@ -361,98 +125,94 @@
         const buttonNav = document.getElementById('button-nav');
         const sectionsWrapper = document.getElementById('sections-wrapper');
         const loader = document.getElementById('loader');
+        const logosStatus = document.getElementById('logos-status');
 
-        // Gestione Drag & Drop
         dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length) {
-                fileInput.files = files;
-                handleFiles(files);
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFiles(e.dataTransfer.files);
             }
         });
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length) {
-                handleFiles(fileInput.files);
-            }
-        });
+        fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFiles(fileInput.files); });
 
         function showLoader() { loader.style.display = 'flex'; }
         function hideLoader() { loader.style.display = 'none'; }
 
         async function handleFiles(files) {
             showLoader();
+            const excelFiles = [];
             
-            // 1. Identifica ed elabora eventuale file WhatsApp per precompilare i campi input
             for (const file of files) {
+                if (file.name.toLowerCase().endsWith('.json')) {
+                    try {
+                        const text = await file.text();
+                        const json = JSON.parse(text);
+                        if (json.logos) {
+                            uploadedLogos = json.logos;
+                            logosStatus.style.display = 'block';
+                            console.log("Loghi caricati:", uploadedLogos);
+                            if (currentPlatformData) {
+                                createPlatformChart('#piattaforma-chart-container', currentPlatformData, 'FOLLOWERS PER PIATTAFORMA');
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Errore lettura JSON loghi:", e);
+                        alert("Il file JSON dei loghi non è valido.");
+                    }
+                    continue; 
+                }
+
                 if (file.name.toLowerCase().includes('whatsapp') && (file.name.endsWith('.xlsx') || file.name.endsWith('.csv') || file.name.endsWith('.xls'))) {
                     try {
                         const data = await file.arrayBuffer();
                         const wb = XLSX.read(data);
                         const sheet = wb.Sheets[wb.SheetNames[0]];
                         const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                        
-                        // Cerca righe con date valide (colonna 0)
                         const rows = json.filter(r => r && r[0] && (String(r[0]).match(/\d/) || typeof r[0] === 'number'));
-                        
-                        // Parsing date e valori per ordinamento
                         const parsedRows = rows.map(r => {
                             let dateVal = r[0];
-                            // Gestione data manuale per formato DD/MM/YYYY
                             if(typeof dateVal === 'string' && dateVal.includes('/')) {
                                 const parts = dateVal.split('/');
                                 dateVal = new Date(parts[2], parts[1]-1, parts[0]);
                             } else if (typeof dateVal === 'number') {
-                                // Gestione data seriale Excel
                                 dateVal = new Date((dateVal - (25567 + 2))*86400*1000); 
-                            } else {
-                                dateVal = new Date(dateVal);
-                            }
-
+                            } else { dateVal = new Date(dateVal); }
                             let numVal = r[1];
-                            if (typeof numVal === 'string') {
-                                // Pulisce stringhe tipo "3.330.000 " togliendo punti e spazi
-                                numVal = parseInt(numVal.replace(/\./g, '').replace(/\s/g, ''), 10);
-                            }
+                            if (typeof numVal === 'string') numVal = parseInt(numVal.replace(/\./g, '').replace(/\s/g, ''), 10);
                             return { date: dateVal, val: numVal || 0 };
                         }).sort((a,b) => a.date - b.date);
 
-                        // Se abbiamo almeno 2 record, prendiamo gli ultimi due
                         if (parsedRows.length >= 2) {
-                            const prev = parsedRows[parsedRows.length - 2].val;
-                            const curr = parsedRows[parsedRows.length - 1].val;
-                            document.getElementById('whatsapp-previous').value = prev;
-                            document.getElementById('whatsapp-current').value = curr;
+                            document.getElementById('whatsapp-previous').value = parsedRows[parsedRows.length - 2].val;
+                            document.getElementById('whatsapp-current').value = parsedRows[parsedRows.length - 1].val;
                         }
-                    } catch (e) {
-                        console.error("Errore lettura file Whatsapp", e);
-                    }
+                    } catch (e) { console.error("Errore lettura file Whatsapp", e); }
+                }
+                
+                if (file.name.match(/\.(xlsx|xls|csv)$/i)) {
+                    excelFiles.push(file);
                 }
             }
 
-            // 2. Legge i valori aggiornati (o appena precompilati) dai campi input
             const whatsappCurrent = parseInt(document.getElementById('whatsapp-current').value, 10) || 0;
             const whatsappPrevious = parseInt(document.getElementById('whatsapp-previous').value, 10) || 0;
             const whatsappData = { current: whatsappCurrent, previous: whatsappPrevious };
 
             const fileData = {};
-            for (const file of files) {
+            for (const file of excelFiles) {
                 try {
                     const data = await file.arrayBuffer();
-                    const workbook = XLSX.read(data);
-                    fileData[file.name] = workbook;
+                    fileData[file.name] = XLSX.read(data);
                 } catch (error) {
-                    console.error(`Errore nel leggere il file ${file.name}:`, error);
-                    alert(`Non è stato possibile leggere il file ${file.name}. Assicurati che sia un file Excel valido.`);
+                    console.error(`Errore file ${file.name}:`, error);
                 }
             }
+            
             if (Object.keys(fileData).length > 0) {
                 processFiles(fileData, whatsappData);
             }
@@ -463,549 +223,263 @@
             if (!workbook.SheetNames.includes(sheetName)) return [];
             return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
         }
-        
-        function findValueByLabel(data, label) {
-            for (const row of data) {
-                if (row && row[0] && typeof row[0] === 'string' && row[0].trim().toLowerCase() === label.toLowerCase()) {
-                    return row[1];
-                }
-            }
-            return null;
-        }
-        
         function findRowIndex(data, label) {
             return data.findIndex(row => row && row[0] && typeof row[0] === 'string' && row[0].trim().toLowerCase().startsWith(label.toLowerCase()));
         }
-
         function formatNumber(n) {
             if (typeof n !== 'number') return String(n).replace('.',',');
-
             if (n >= 1000000) {
-                const millions = n / 1000000;
-                let formatted = millions.toFixed(2);
-                if (formatted.endsWith('.00')) {
-                    formatted = formatted.substring(0, formatted.length - 3);
-                }
-                else if (formatted.endsWith('0')) {
-                    formatted = formatted.substring(0, formatted.length - 1);
-                }
+                let formatted = (n / 1000000).toFixed(2);
+                if (formatted.endsWith('.00')) formatted = formatted.substring(0, formatted.length - 3);
+                else if (formatted.endsWith('0')) formatted = formatted.substring(0, formatted.length - 1);
                 return formatted.replace('.', ',') + 'M';
             }
-
-            if (n >= 1000) {
-                return Math.round(n / 1000) + 'K';
-            }
+            if (n >= 1000) return Math.round(n / 1000) + 'K';
             return n.toLocaleString('it-IT');
         }
-
-        // Funzione specifica per "Dimensione totale community" (2 decimali fissi + K/M)
         function formatTotalCommunity(n) {
             if (typeof n !== 'number') return String(n).replace('.',',');
-
-            if (n >= 1000000) {
-                // Esempio: 3.148.575 -> 3,14M (Tronca a 2 decimali senza arrotondare per eccesso)
-                const millions = Math.floor((n / 1000000) * 100) / 100;
-                return millions.toFixed(2).replace('.', ',') + 'M';
-            }
-            if (n >= 1000) {
-                // Esempio: 150.500 -> 150,50K
-                const thousands = Math.floor((n / 1000) * 100) / 100;
-                return thousands.toFixed(2).replace('.', ',') + 'K';
-            }
+            if (n >= 1000000) return (Math.floor((n / 1000000) * 100) / 100).toFixed(2).replace('.', ',') + 'M';
+            if (n >= 1000) return (Math.floor((n / 1000) * 100) / 100).toFixed(2).replace('.', ',') + 'K';
             return n.toLocaleString('it-IT');
         }
-
-        // Funzione dedicata per l'Executive Summary
         function formatSmartNumber(n) {
             if (typeof n !== 'number') return "0";
-            
-            if (n >= 1000000) {
-                // Per i milioni: mantiene logica esistente (fino a 2 decimali, rimuove zeri inutili)
-                let value = n / 1000000;
-                let formatted = parseFloat(value.toFixed(2));
-                return String(formatted).replace('.', ',') + 'M';
-            } else if (n >= 1000) {
-                // Per le migliaia: arrotonda all'intero più vicino (es. 275.921 -> 276K)
-                let value = n / 1000;
-                let formatted = Math.round(value);
-                return String(formatted) + 'K';
-            }
-
-            // Per numeri piccoli (< 1000), restituisce il numero intero
+            if (n >= 1000000) return parseFloat((n / 1000000).toFixed(2)).toString().replace('.', ',') + 'M';
+            else if (n >= 1000) return Math.round(n / 1000) + 'K';
             return String(Math.round(n));
         }
-
         function formatNumberWithThousands(n, decimalPlaces = 0) {
             if (typeof n !== 'number') return String(n).replace('.',',');
-            const options = {};
-            if (decimalPlaces > 0) {
-                options.minimumFractionDigits = decimalPlaces;
-                options.maximumFractionDigits = decimalPlaces;
-            }
-            return n.toLocaleString('it-IT', options);
+            return n.toLocaleString('it-IT', { minimumFractionDigits: decimalPlaces, maximumFractionDigits: decimalPlaces });
         }
-        
+
         async function createPlatformChart(containerId, data, title) {
             const container = d3.select(containerId);
             if (container.empty()) return;
             container.selectAll("*").remove();
             
-            // SOLUZIONE DEFINITIVA: Loghi integrati direttamente nel codice
-            // Assicurati di incollare le stringhe Base64 COMPLETE tra le virgolette
-            const logosData = {
-                facebook: { base64: "data:image/png;base64,data:image/png;base64,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" },
+            const profilesMap = {
+                'facebook': ['Poste Italiane', 'PosteMobile', 'Postepay'],
+                'linkedin': ['Poste Italiane'],
+                'x': ['Poste Italiane', 'PosteSpedizioni', 'WebPoste'],
+                'instagram': ['Poste Italiane', 'Postepay'],
+                'youtube': ['Poste Italiane'],
+                'whatsapp': ['Poste Italiane']
+            };
+
+            const formattedData = data.map(d => {
+                const key = d[0].toLowerCase().trim();
+                let logoBase64 = '';
+                let brandLabel = d[0];
                 
-                instagram: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAA2B0lEQVR4nM19CZBeV3Xmve+9f+n/7251t6SW1JK1S7YlLzLel5jByDYQPBDMEkIITGEGZoAQIDBFCMlAUanMQjEwGaDYhjXGYWwXMIYK2ME2YGzL2JaxsSxba0uWWi2ppV7+9b17p85yl7f8rbZnMuHRyH..." },
-                linkedin: { base64: "data:image/png;base64,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" },
-                youtube: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAQ3ElEQVR4nO1dC5AUxRn+e3Z294A74Tjg4HiIlBpjhDM+qsBHovhKCUaNLwiWWlFTMSmjplKmtBJRE6tSSUylfMZHfFEhYmKsUIlGrRgh5StSQQ4RFEEBecjjDgHh7na3/9RMz/T09PTMzuz27N2u/FW3N9vT093z9bf//8/fjyG..." },
-                whatsapp: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAdwElEQVR4nO2deXgc1ZXo7629V7W61a1dsiVZlmx5lfcNbINDbCAJy8TECSSE8GbyYICQ98KSl5AZvkmG5+RlI3lZYPhIPgLYDASTYGxsg22MF7zbkm0t1taytlar96WW+76q6m5Vd1fLUnfJ+DE6f9ilqlun7v31rbuce84tiBACGaTX52..." },
-                x: { base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAXjklEQVR4nO1dCXgURdr++prJPZkcnEFRDiUEDIIEkMMVDTdoEEMIIiAqKoesrqsICsohv8cCIosXCMQgR4SEAIZjEbxIWATkCK4IEhUDJIQc5Jg+6n+qunuu7kRIuicgeZ+G6XRXVVe/XfNW1dffV0MhhKAaHPz+0I4d//nhyJG8334vunSphpR1AUVRcsnkHwKgXB9yimquq61PdTWU5OPq2RoyKgnVKzs/1b+U0/JfkiTRFG0LCW4RFRUT3W7AwH69+/Sq9jZ1K7c5PfPD5Z/s2be/tLySoSmrhbOwrElEI/kG5LKdjLvz4nm7rloghOSn4Z5LZo0CJMlPDEkKO24sKQfkJ+vGPs6oEiIXqzx0taIUfmhqaWQHH3EAOEgKpnOXuElPTxw77pE/J7qwsHDKlOdS07dS..." }
-            };
+                if (uploadedLogos) {
+                    let jsonKey = key;
+                    if (key.includes('twitter')) jsonKey = 'x';
+                    if (uploadedLogos[jsonKey]) logoBase64 = uploadedLogos[jsonKey].base64 || '';
+                }
 
-            const platformConfig = {
-                'facebook': { logo: logosData.facebook?.base64 || '', profiles: ['Poste Italiane', 'PosteMobile', 'Postepay'], label: 'Facebook' },
-                'linkedin': { logo: logosData.linkedin?.base64 || '', profiles: ['Poste Italiane'], label: 'Linkedin' },
-                'x': { logo: logosData.x?.base64 || '', profiles: ['Poste Italiane', 'PosteSpedizioni', 'WebPoste'], label: 'X' },
-                'instagram': { logo: logosData.instagram?.base64 || '', profiles: ['Poste Italiane', 'Postepay'], label: 'Instagram' },
-                'youtube': { logo: logosData.youtube?.base64 || '', profiles: ['Poste Italiane'], label: 'Youtube' },
-                'whatsapp': { logo: logosData.whatsapp?.base64 || '', profiles: ['Poste Italiane'], label: 'Whatsapp' }
-            };
+                return { 
+                    name: d[0], 
+                    value: d[1], 
+                    logo: logoBase64, 
+                    profiles: profilesMap[key] || [],
+                    label: brandLabel
+                };
+            }).sort((a, b) => b.value - a.value);
 
-            const formattedData = data
-                .map(d => {
-                    const key = d[0].toLowerCase();
-                    const config = platformConfig[key] || { logo: '', profiles: [], label: d[0] };
-                    return { name: d[0], value: d[1], ...config };
-                })
-                .sort((a, b) => b.value - a.value);
-
-            const width = 1000;
-            const height = 600; // Altezza totale ridotta per compattare
-            // Margine inferiore ridotto drasticamente (da 220 a 140) per avvicinare i loghi alla base
+            const width = 1000; const height = 600; 
             const margin = { top: 60, right: 30, bottom: 140, left: 90 };
 
-            const svg = container.append("svg")
-                .attr("width", "100%")
-                .attr("height", "100%")
-                .attr("viewBox", `0 0 ${width} ${height}`)
-                .attr("class", "platform-chart")
-                .style("font-family", "'Avenir Next LT Pro', sans-serif");
-
-            const x = d3.scaleBand()
-                .domain(formattedData.map(d => d.name))
-                .range([margin.left, width - margin.right])
-                .padding(0.4);
-
+            const svg = container.append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`).attr("class", "platform-chart").style("font-family", "'Avenir Next LT Pro', sans-serif");
+            const x = d3.scaleBand().domain(formattedData.map(d => d.name)).range([margin.left, width - margin.right]).padding(0.4);
             const yMax = d3.max(formattedData, d => d.value);
-            const y = d3.scaleLinear()
-                .domain([0, yMax * 1.2])
-                .range([height - margin.bottom, margin.top]);
+            const y = d3.scaleLinear().domain([0, yMax * 1.2]).range([height - margin.bottom, margin.top]);
+            const yAxis = d3.axisLeft(y).ticks(5).tickFormat(formatNumber).tickSize(-(width - margin.left - margin.right));
 
-            const yAxis = d3.axisLeft(y)
-                .ticks(5)
-                .tickFormat(formatNumber)
-                .tickSize(-(width - margin.left - margin.right));
+            svg.append("g").attr("transform", `translate(${margin.left},0)`).call(yAxis).call(g => g.select(".domain").remove()).call(g => g.selectAll(".tick line").attr("stroke", "#e0e0e0").attr("stroke-dasharray", "2,2")).call(g => g.selectAll(".tick text").attr("fill", "#7b7b7a").style("font-size", "18px"));
+            svg.append("g").selectAll("rect").data(formattedData).join("rect").attr("x", d => x(d.name)).attr("y", d => y(d.value)).attr("height", d => y(0) - y(d.value)).attr("width", x.bandwidth()).attr("fill", "#bfd7fd");
+            svg.append("g").selectAll("text.value").data(formattedData).join("text").attr("class", "value").attr("x", d => x(d.name) + x.bandwidth() / 2).attr("y", d => y(d.value) - 20).attr("text-anchor", "middle").attr("fill", "#0431AE").style("font-weight", "bold").style("font-size", "26px").text(d => formatNumber(d.value));
 
-            svg.append("g")
-                .attr("transform", `translate(${margin.left},0)`)
-                .call(yAxis)
-                .call(g => g.select(".domain").remove())
-                .call(g => g.selectAll(".tick line").attr("stroke", "#e0e0e0").attr("stroke-dasharray", "2,2"))
-                .call(g => g.selectAll(".tick text").attr("fill", "#7b7b7a").style("font-size", "18px"));
-
-            svg.append("g")
-                .selectAll("rect")
-                .data(formattedData)
-                .join("rect")
-                .attr("x", d => x(d.name))
-                .attr("y", d => y(d.value))
-                .attr("height", d => y(0) - y(d.value))
-                .attr("width", x.bandwidth())
-                .attr("fill", "#bfd7fd");
-
-            svg.append("g")
-                .selectAll("text.value")
-                .data(formattedData)
-                .join("text")
-                .attr("class", "value")
-                .attr("x", d => x(d.name) + x.bandwidth() / 2)
-                .attr("y", d => y(d.value) - 20)
-                .attr("text-anchor", "middle")
-                .attr("fill", "#0431AE")
-                .style("font-weight", "bold")
-                .style("font-size", "26px")
-                .text(d => formatNumber(d.value));
-
-            // Translate modificato: avvicinato alla base del grafico (+10 invece di +40)
-            const labels = svg.append("g")
-                .selectAll("g")
-                .data(formattedData)
-                .join("g")
-                .attr("transform", d => `translate(${x(d.name) + x.bandwidth() / 2}, ${height - margin.bottom + 10})`);
-
-            labels.append("image")
-                .attr("xlink:href", d => d.logo)
-                .attr("x", -25) // Centrato (metà di 50)
-                .attr("y", 0)
-                .attr("width", 50) // Dimensione uniforme
-                .attr("height", 50); // Dimensione uniforme
-
-            labels.append("text")
-                .attr("y", 75)
-                .attr("text-anchor", "middle")
-                .attr("fill", "#0431AE")
-                .style("font-weight", "bold")
-                .style("font-size", "22px")
-                .text(d => d.label);
-
+            const labels = svg.append("g").selectAll("g").data(formattedData).join("g").attr("transform", d => `translate(${x(d.name) + x.bandwidth() / 2}, ${height - margin.bottom + 10})`);
+            labels.filter(d => d.logo).append("image").attr("href", d => d.logo).attr("x", -25).attr("y", 0).attr("width", 50).attr("height", 50);
+            labels.append("text").attr("y", 75).attr("text-anchor", "middle").attr("fill", "#0431AE").style("font-weight", "bold").style("font-size", "22px").text(d => d.label);
             labels.each(function(d) {
                 const group = d3.select(this);
                 d.profiles.forEach((profile, i) => {
-                    group.append("text")
-                        .attr("y", 100 + (i * 20)) // Spaziatura ridotta per compattezza
-                        .attr("text-anchor", "middle")
-                        .attr("fill", "#7b7b7a")
-                        .style("font-size", "14px")
-                        .text(profile);
+                    group.append("text").attr("y", 100 + (i * 20)).attr("text-anchor", "middle").attr("fill", "#7b7b7a").style("font-size", "14px").text(profile);
                 });
             });
         }
 
-
         function createBenchmarkChart(containerId, data, title) {
             const container = d3.select(containerId);
-            if (container.empty()) {
-                console.error(`Container con ID ${containerId} non trovato.`);
-                return;
-            }
+            if (container.empty()) return;
             container.selectAll("*").remove();
-
-            const width = 2300;
-            const height = 519;
-            const margin = { top: 80, right: 40, bottom: 200, left: 140 };
-
-            const svg = container.append("svg")
-                .attr("width", "100%")
-                .attr("height", "100%")
-                .attr("viewBox", `0 0 ${width} ${height}`)
-                .attr("class", "benchmark-chart");
-
-            const x = d3.scaleBand()
-                .domain(data.map(d => d.name))
-                .range([margin.left, width - margin.right])
-                .padding(0.3);
-
+            const width = 2300; const height = 519; const margin = { top: 80, right: 40, bottom: 200, left: 140 };
+            const svg = container.append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`).attr("class", "benchmark-chart");
+            const x = d3.scaleBand().domain(data.map(d => d.name)).range([margin.left, width - margin.right]).padding(0.3);
             const yMax = d3.max(data, d => d.value);
-            const y = d3.scaleLinear()
-                .domain([0, yMax * 1.2])
-                .range([height - margin.bottom, margin.top]);
-
+            const y = d3.scaleLinear().domain([0, yMax * 1.2]).range([height - margin.bottom, margin.top]);
             const xAxis = d3.axisBottom(x).tickSize(0);
-            const xAxisGroup = svg.append("g")
-                .attr("transform", `translate(0,${height - margin.bottom})`)
-                .call(xAxis);
-            
-            xAxisGroup.selectAll("text")
-                .attr("class", "axis-label")
-                .attr("transform", "rotate(-45)")
-                .style("text-anchor", "end")
-                .attr("dy", "0.8em") 
-                .style("font-size", "26px");
+            const xAxisGroup = svg.append("g").attr("transform", `translate(0,${height - margin.bottom})`).call(xAxis);
+            xAxisGroup.selectAll("text").attr("class", "axis-label").attr("transform", "rotate(-45)").style("text-anchor", "end").attr("dy", "0.8em").style("font-size", "26px");
             xAxisGroup.select(".domain").remove();
+            const yAxis = d3.axisLeft(y).ticks(5).tickFormat(formatNumber).tickSize(-(width - margin.left - margin.right));
+            svg.append("g").attr("transform", `translate(${margin.left},0)`).call(yAxis).call(g => g.select(".domain").remove()).call(g => g.selectAll(".tick line").attr("class", "grid-line")).call(g => g.selectAll(".tick text").attr("class", "axis-label").attr("dx", "-0.5em").style("font-size", "26px"));
+            svg.append("g").selectAll("rect").data(data).join("rect").attr("x", d => x(d.name)).attr("y", d => y(d.value)).attr("height", d => y(0) - y(d.value)).attr("width", x.bandwidth()).attr("fill", d => d.name.toLowerCase().includes('poste') ? 'var(--chart-title-blue)' : 'var(--chart-bar-blue)');
+            svg.append("g").selectAll("text.bar-label").data(data).join("text").attr("class", "bar-label").attr("x", d => x(d.name) + x.bandwidth() / 2).attr("y", d => y(d.value) - 12).attr("text-anchor", "middle").style("font-size", "26px").text(d => formatNumber(d.value));
+            svg.append("text").attr("x", margin.left).attr("y", margin.top - 40).attr("text-anchor", "start").style("font-size", "32px").style("font-weight", "bold").style("fill", "var(--chart-title-blue)").text(title);
+            svg.append("line").attr("x1", margin.left).attr("y1", margin.top - 25).attr("x2", margin.left + 450).attr("y2", margin.top - 25).attr("stroke", "var(--chart-title-blue)").attr("stroke-width", 2);
+        }
 
-            const yTicks = y.ticks(5).filter(tick => tick > 0);
-            const yAxis = d3.axisLeft(y)
-                .tickValues(yTicks)
-                .tickFormat(formatNumber)
-                .tickSize(-(width - margin.left - margin.right));
-
-            svg.append("g")
-                .attr("transform", `translate(${margin.left},0)`)
-                .call(yAxis)
-                .call(g => g.select(".domain").remove())
-                .call(g => g.selectAll(".tick line").attr("class", "grid-line"))
-                .call(g => g.selectAll(".tick text")
-                    .attr("class", "axis-label")
-                    .attr("dx", "-0.5em")
-                    .style("font-size", "26px")
-                );
-
-            svg.append("g")
-                .selectAll("rect")
-                .data(data)
-                .join("rect")
-                .attr("x", d => x(d.name))
-                .attr("y", d => y(d.value))
-                .attr("height", d => y(0) - y(d.value))
-                .attr("width", x.bandwidth())
-                .attr("fill", d => d.name.toLowerCase().includes('poste') ? 'var(--chart-title-blue)' : 'var(--chart-bar-blue)');
-
-            svg.append("g")
-                .selectAll("text")
-                .data(data)
-                .join("text")
-                .attr("class", "bar-label")
-                .attr("x", d => x(d.name) + x.bandwidth() / 2)
-                .attr("y", d => y(d.value) - 12)
-                .attr("text-anchor", "middle")
-                .style("font-size", "26px")
-                .text(d => formatNumber(d.value));
-
-            svg.append("text")
-                .attr("x", margin.left)
-                .attr("y", margin.top - 40)
-                .attr("text-anchor", "start")
-                .style("font-size", "32px")
-                .style("font-weight", "bold")
-                .style("fill", "var(--chart-title-blue)")
-                .style("font-family", "var(--font-family)")
-                .text(title);
-
-            svg.append("line")
-                .attr("x1", margin.left)
-                .attr("y1", margin.top - 25)
-                .attr("x2", margin.left + 450) 
-                .attr("y2", margin.top - 25)
-                .attr("stroke", "var(--chart-title-blue)")
-                .attr("stroke-width", 2);
+        function createTrendChart(containerId, data, title) {
+            const container = d3.select(containerId);
+            if (container.empty() || !data || data.length === 0) return;
+            container.selectAll("*").remove();
+            const width = 1580; const height = 718; const margin = { top: 120, right: 60, bottom: 200, left: 120 };
+            const svg = container.append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width} ${height}`).style("background", "#fff").attr("class", "trend-chart");
+            const headerGroup = svg.append("g");
+            headerGroup.append("text").attr("x", 170).attr("y", 95).text(title || "ANDAMENTO CRESCITA").attr("font-family", "var(--font-family)").attr("font-size", "62px").attr("fill", "var(--chart-title-blue)").style("text-transform", "uppercase");
+            headerGroup.append("line").attr("x1", 165).attr("y1", 110).attr("x2", width - margin.right).attr("y2", 110).attr("stroke", "var(--chart-title-blue)").attr("stroke-width", 3);
+            const xDomain = data.map(d => d[0]);
+            const yValues = data.map(d => d[1]);
+            const x = d3.scalePoint().domain(xDomain).range([margin.left, width - margin.right]).padding(0.5);
+            const y = d3.scaleLinear().domain([d3.min(yValues) * 0.99, d3.max(yValues) * 1.01]).range([height - margin.bottom, margin.top + 40]);
+            const yAxis = d3.axisLeft(y).ticks(6).tickFormat(d => { const val = Math.round(d / 1000); return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' K'; }).tickSize(-(width - margin.left - margin.right));
+            const yAxisGroup = svg.append("g").attr("transform", `translate(${margin.left},0)`).call(yAxis);
+            yAxisGroup.select(".domain").remove(); yAxisGroup.selectAll(".tick line").attr("stroke", "#e0e0e0").attr("stroke-width", 2); yAxisGroup.selectAll(".tick text").attr("fill", "#7b7b7a").attr("font-size", "30px").attr("dx", "-10");
+            const isDaily = xDomain[0] && xDomain[0].includes('/');
+            const monthNames = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+            let xAxisObj = d3.axisBottom(x);
+            if (isDaily) {
+                const oddDays = xDomain.filter(d => parseInt(d.split('/')[0]) % 2 !== 0);
+                xAxisObj = xAxisObj.tickValues(oddDays).tickFormat(d => { const parts = d.split('/'); const day = parseInt(parts[0], 10); const month = monthNames[parseInt(parts[1], 10) - 1]; return `${day}-${month}`; });
+            }
+            const xAxisGroup = svg.append("g").attr("transform", `translate(0,${height - margin.bottom})`).call(xAxisObj);
+            xAxisGroup.select(".domain").attr("stroke", "#e0e0e0").attr("stroke-width", 2); xAxisGroup.selectAll(".tick line").remove();
+            xAxisGroup.selectAll(".tick text").attr("fill", "#7b7b7a").attr("font-size", "39px").attr("transform", "rotate(-90)").attr("text-anchor", "end").attr("dx", "-10").attr("dy", "-5");
+            const line = d3.line().x(d => x(d[0])).y(d => y(d[1])).curve(d3.curveMonotoneX);
+            svg.append("path").datum(data).attr("fill", "none").attr("stroke", "var(--chart-bar-blue)").attr("stroke-width", 10).attr("d", line);
         }
 
         function getStyledSvgString(svgElement) {
             const svgClone = svgElement.cloneNode(true);
             const allOriginalElements = svgElement.querySelectorAll('*');
             const allClonedElements = svgClone.querySelectorAll('*');
-
             allOriginalElements.forEach((origEl, index) => {
                 const cloneEl = allClonedElements[index];
                 const computedStyle = window.getComputedStyle(origEl);
                 let inlineStyle = "";
-                for (let i = 0; i < computedStyle.length; i++) {
-                    const prop = computedStyle[i];
-                    inlineStyle += `${prop}: ${computedStyle.getPropertyValue(prop)}; `;
-                }
+                for (let i = 0; i < computedStyle.length; i++) { const prop = computedStyle[i]; inlineStyle += `${prop}: ${computedStyle.getPropertyValue(prop)}; `; }
                 cloneEl.setAttribute('style', inlineStyle);
             });
             return new XMLSerializer().serializeToString(svgClone);
         }
-
-        async function copySvgToClipboard(svgElement, button) {
+        function copySvgToClipboard(svgElement, button) {
             showFeedbackOnCopyButton(button, 'Copiando...');
-            try {
-                const svgData = getStyledSvgString(svgElement);
-                const viewBox = svgElement.getAttribute('viewBox').split(' ').map(Number);
-                const width = viewBox[2];
-                const height = viewBox[3];
-                
-                const scaleFactor = 2;
-                const canvas = document.createElement("canvas");
-                canvas.width = width * scaleFactor;
-                canvas.height = height * scaleFactor;
-                
-                const ctx = canvas.getContext("2d");
-                ctx.scale(scaleFactor, scaleFactor);
-
-                const img = new Image();
-                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-                const url = URL.createObjectURL(svgBlob);
-
-                img.onload = async () => {
-                    ctx.drawImage(img, 0, 0, width, height);
-                    URL.revokeObjectURL(url);
-                    canvas.toBlob(async (blob) => {
-                        try {
-                            await navigator.clipboard.write([
-                                new ClipboardItem({ 'image/png': blob })
-                            ]);
-                            showFeedbackOnCopyButton(button, 'OK!');
-                        } catch (err) {
-                           console.error('Errore durante la scrittura negli appunti:', err);
-                           showFeedbackOnCopyButton(button, 'Err!');
-                        }
-                    }, 'image/png');
-                };
-                img.onerror = (e) => {
-                    URL.revokeObjectURL(url);
-                    console.error('Errore nel caricare l\'immagine SVG nel canvas', e);
-                    showFeedbackOnCopyButton(button, 'Err!');
-                };
-                img.src = url;
-
-            } catch (err) {
-                console.error('Errore durante la copia del grafico:', err);
-                showFeedbackOnCopyButton(button, 'Err!');
-            }
+            const svgData = getStyledSvgString(svgElement);
+            const viewBox = svgElement.getAttribute('viewBox').split(' ').map(Number);
+            const width = viewBox[2]; const height = viewBox[3]; const scaleFactor = 2;
+            const canvas = document.createElement("canvas"); canvas.width = width * scaleFactor; canvas.height = height * scaleFactor;
+            const ctx = canvas.getContext("2d"); ctx.scale(scaleFactor, scaleFactor);
+            const img = new Image();
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(svgBlob);
+            img.onload = async () => {
+                ctx.drawImage(img, 0, 0, width, height); URL.revokeObjectURL(url);
+                canvas.toBlob(async (blob) => {
+                    try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); showFeedbackOnCopyButton(button, 'OK!'); } 
+                    catch (err) { console.error(err); showFeedbackOnCopyButton(button, 'Err!'); }
+                }, 'image/png');
+            };
+            img.src = url;
         }
-        
         function exportSvg(svgElement, filename) {
-            try {
-                const svgData = getStyledSvgString(svgElement);
-                const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            } catch (err) {
-                console.error('Errore durante l\'esportazione del SVG:', err);
-            }
+            const svgData = getStyledSvgString(svgElement);
+            const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         }
-        
+        function createTableHTML(data, headers, title) {
+            let tableRows = data.map(row => `<tr>${row.map(cell => {
+                const isNumeric = typeof cell === 'number';
+                const formattedCell = isNumeric ? formatNumberWithThousands(cell) : cell;
+                const rawValueAttr = isNumeric ? `data-raw-value="${cell}"` : '';
+                return `<td ${rawValueAttr}>${formattedCell}</td>`;
+            }).join('')}</tr>`).join('');
+            return `<div class="table-wrapper"><button class="copy-button" title="Copia tabella"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button><h3>${title}</h3><table data-copy-target><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>`;
+        }
+        function showFeedbackOnCopyButton(button, message) { const originalContent = button.innerHTML; button.innerHTML = message; setTimeout(() => { button.innerHTML = originalContent; }, 1500); }
+
         function processFiles(fileData, whatsappData) {
             const fansGlobaleWorkbook = Object.values(fileData).find(wb => wb.SheetNames.includes('Total community size'));
             const competitorWorkbook = Object.values(fileData).find(wb => wb.SheetNames.includes('COMPETITORS'));
 
             if (!fansGlobaleWorkbook || !competitorWorkbook) {
-                alert("Assicurati di aver caricato sia il file 'Report - Fans globale' che quello dei 'Competitor'.");
+                alert("Assicurati di caricare 'Report - Fans globale' e 'Competitor'.");
                 return;
             }
 
-            buttonNav.innerHTML = '';
-            sectionsWrapper.innerHTML = '';
+            buttonNav.innerHTML = ''; sectionsWrapper.innerHTML = '';
 
             const totalCommunitySheet = getSheetData(fansGlobaleWorkbook, 'Total community size');
-            
             let totalCommunitySize = 0, previousTotal = 0, totalGrowth = 0, relativeChange = '0.00%';
-
             const headerRowIndex = totalCommunitySheet.findIndex(row => row && String(row[2]).toLowerCase().includes('relative change'));
             if (headerRowIndex > -1 && totalCommunitySheet.length > headerRowIndex + 1) {
                 const dataRow = totalCommunitySheet[headerRowIndex + 1];
-                totalCommunitySize = Number(dataRow[0]) || 0;
-                previousTotal = Number(dataRow[1]) || 0;
-                totalGrowth = totalCommunitySize - previousTotal;
+                totalCommunitySize = Number(dataRow[0]) || 0; previousTotal = Number(dataRow[1]) || 0; totalGrowth = totalCommunitySize - previousTotal;
             }
-            
-            // --- INIZIO LOGICA WHATSAPP ---
             const whatsappGrowth = whatsappData.current - whatsappData.previous;
-
-            // Aggiorna i totali con i dati di WhatsApp
             const finalTotalCommunitySize = totalCommunitySize + whatsappData.current;
             const finalTotalGrowth = totalGrowth + whatsappGrowth;
             const finalPreviousTotal = previousTotal + whatsappData.previous;
+            if (finalPreviousTotal > 0) relativeChange = ((finalTotalGrowth / finalPreviousTotal) * 100).toFixed(2) + '%';
+            else if (finalTotalCommunitySize > 0) relativeChange = '100.00%';
 
-            // Ricalcola la variazione percentuale complessiva
-            if (finalPreviousTotal > 0) {
-                const newRelativeChange = (finalTotalGrowth / finalPreviousTotal) * 100;
-                relativeChange = newRelativeChange.toFixed(2) + '%';
-            } else if (finalTotalCommunitySize > 0) {
-                relativeChange = '100.00%';
-            }
-            // --- FINE LOGICA WHATSAPP ---
-            
             const perPiattaformaSheet = getSheetData(fansGlobaleWorkbook, 'Fans Poste per piattaforma');
             const platformData = perPiattaformaSheet.slice(findRowIndex(perPiattaformaSheet, 'facebook'));
+            if(whatsappData.current > 0) platformData.push(['Whatsapp', whatsappData.current]);
             
-            // Aggiungi WhatsApp ai dati della piattaforma se il valore è maggiore di zero
-            if(whatsappData.current > 0) {
-                platformData.push(['Whatsapp', whatsappData.current]);
-            }
-            
+            currentPlatformData = platformData;
+
             const fansPosteCrescitaSheet = getSheetData(fansGlobaleWorkbook, 'Fans Poste Crescita');
-            
-            // Strutture dati
-            let dailyGrowthData = []; 
-            let currentMonthDetailed = []; 
-
+            let dailyGrowthData = []; let currentMonthDetailed = []; 
             if(fansPosteCrescitaSheet.length > 13) {
-                 const rawRows = fansPosteCrescitaSheet
-                    .slice(12, 43)
-                    .filter(row => row && row[0] && (row[1] !== null && row[1] !== undefined));
-
+                 const rawRows = fansPosteCrescitaSheet.slice(12, 43).filter(row => row && row[0] && (row[1] !== null && row[1] !== undefined));
                  currentMonthDetailed = rawRows.map(row => {
                      let dateObj;
-                     if (typeof row[0] === 'number') {
-                         const d = XLSX.SSF.parse_date_code(row[0]);
-                         dateObj = new Date(d.y, d.m - 1, d.d);
-                     } else {
-                         dateObj = new Date(row[0]);
-                     }
+                     if (typeof row[0] === 'number') { const d = XLSX.SSF.parse_date_code(row[0]); dateObj = new Date(d.y, d.m - 1, d.d); } else { dateObj = new Date(row[0]); }
                      if (isNaN(dateObj)) dateObj = new Date();
-
-                     const dStr = String(dateObj.getDate()).padStart(2, '0');
-                     const mStr = String(dateObj.getMonth() + 1).padStart(2, '0');
-                     
-                     return {
-                         date: dateObj,
-                         formattedDate: `${dStr}/${mStr}`,
-                         val: row[1],
-                         monthKey: `${dateObj.getFullYear()}_${mStr}`
-                     };
+                     const dStr = String(dateObj.getDate()).padStart(2, '0'); const mStr = String(dateObj.getMonth() + 1).padStart(2, '0');
+                     return { date: dateObj, formattedDate: `${dStr}/${mStr}`, val: row[1], monthKey: `${dateObj.getFullYear()}_${mStr}` };
                  });
-
                  dailyGrowthData = currentMonthDetailed.map(item => [item.formattedDate, item.val]);
             }
-
-            // Logica distribuzione WhatsApp: Distribuzione uniforme con gestione resto finale
             if (dailyGrowthData.length > 0 && (whatsappData.current > 0 || whatsappData.previous > 0)) {
-                const waGrowth = whatsappData.current - whatsappData.previous;
-                const waBase = whatsappData.previous;
-                const daysCount = dailyGrowthData.length;
-                
-                // Calcolo quota giornaliera intera e residuo
-                const dailyQuota = Math.floor(waGrowth / daysCount);
-                const remainder = waGrowth % daysCount;
-
+                const waGrowth = whatsappData.current - whatsappData.previous; const waBase = whatsappData.previous; const daysCount = dailyGrowthData.length;
+                const dailyQuota = Math.floor(waGrowth / daysCount); const remainder = waGrowth % daysCount;
                 dailyGrowthData = dailyGrowthData.map((row, index) => {
-                    // La crescita accumulata è la quota giornaliera * numero giorni trascorsi
                     let accumulatedGrowth = dailyQuota * (index + 1);
-                    
-                    // Il residuo viene aggiunto interamente all'ultimo giorno
-                    if (index === daysCount - 1) {
-                        accumulatedGrowth += remainder;
-                    }
-                    
-                    // Il valore del giorno è: Valore Originale Excel + Base WhatsApp (mese prec) + Crescita WhatsApp accumulata fino a oggi
-                    const newVal = row[1] + waBase + accumulatedGrowth;
-
-                    return [row[0], newVal];
+                    if (index === daysCount - 1) accumulatedGrowth += remainder;
+                    return [row[0], row[1] + waBase + accumulatedGrowth];
                 });
-
-                // Sincronizza currentMonthDetailed con i nuovi valori (Excel + WhatsApp)
-                currentMonthDetailed.forEach((item, i) => {
-                    if (dailyGrowthData[i]) {
-                        item.val = dailyGrowthData[i][1];
-                    }
-                });
+                currentMonthDetailed.forEach((item, i) => { if (dailyGrowthData[i]) item.val = dailyGrowthData[i][1]; });
             }
-            
-            // Preparazione dati per tabella con calcolo differenziale rispetto al giorno precedente
             let tableDataWithDelta = [];
             if (dailyGrowthData.length > 0) {
                 tableDataWithDelta = dailyGrowthData.map((row, index) => {
-                    const currentVal = row[1];
-                    let deltaStr = "";
-                    
-                    if (index === 0) {
-                        // Primo giorno: vuoto come richiesto per evitare loop o calcoli incerti
-                        deltaStr = "-";
-                    } else {
-                        const delta = currentVal - dailyGrowthData[index - 1][1];
-                        deltaStr = delta > 0 ? '+' + formatNumberWithThousands(delta) : formatNumberWithThousands(delta);
-                    }
-                    
+                    const currentVal = row[1]; let deltaStr = index === 0 ? "-" : (currentVal - dailyGrowthData[index - 1][1] > 0 ? '+' : '') + formatNumberWithThousands(currentVal - dailyGrowthData[index - 1][1]);
                     return [row[0], currentVal, deltaStr];
                 });
             }
-            
             let dailyGrowthTableHTML = dailyGrowthData.length > 0 ? createTableHTML(tableDataWithDelta, ['Giorno', 'Iscritti Totali', 'Incremento Giornaliero'], 'Crescita giornaliera Fans') : '';
 
-            // --- LOGICA TABELLA ANNUALE ---
-            if (!window.exportExcelData) {
-                window.exportExcelData = function(filename, jsonDataEncoded) {
-                    try {
-                        const data = JSON.parse(decodeURIComponent(jsonDataEncoded));
-                        const ws = XLSX.utils.aoa_to_sheet(data);
-                        const wb = XLSX.utils.book_new();
-                        XLSX.utils.book_append_sheet(wb, ws, "Dati");
-                        XLSX.writeFile(wb, filename + ".xlsx");
-                    } catch(e) { alert("Errore export."); }
-                };
-            }
-
+            // --- GESTIONE LOGICA ANNUALE REINTEGRATA ---
+            if (!window.exportExcelData) { window.exportExcelData = function(filename, jsonDataEncoded) { try { const data = JSON.parse(decodeURIComponent(jsonDataEncoded)); const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dati"); XLSX.writeFile(wb, filename + ".xlsx"); } catch(e) { alert("Errore export."); } }; }
+            
             let monthlyTrendData = [];
-
+            
             if (currentMonthDetailed.length > 0) {
                 const annualFileKey = Object.keys(fileData).find(k => k.toLowerCase().startsWith('annuale') && (k.endsWith('.xlsx') || k.endsWith('.xls')));
                 let historicalRows = [];
@@ -1063,7 +537,6 @@
                 sortedKeys.forEach(key => {
                     const monthRows = groupedByMonth[key];
                     
-                    // Prepara dati per il grafico annuale (prendi l'ultimo valore del mese)
                     if (monthRows.length > 0) {
                         const lastRow = monthRows[monthRows.length - 1];
                         const d = lastRow.date;
@@ -1094,7 +567,6 @@
                     `;
                 });
 
-                // Trucco HTML per chiudere il container precedente e aprirne uno nuovo visibile
                 dailyGrowthTableHTML += `
                     </div>
                     </details>
@@ -1122,190 +594,31 @@
                 li: { 'Poste Italiane': 'Poste Italiane', 'Intesa Sanpaolo': 'Intesa Sanpaolo', 'Eni': 'Eni', 'Trenitalia': 'Trenitalia', 'INPS_official': 'INPS', 'CDP Cassa Depositi e Prestiti': 'CDP', 'BNL BNP Paribas': 'BNL BNP Paribas', 'UniCredit': 'UniCredit', 'Enel Group': 'Enel', 'Gruppo Ferrovie dello Stato Italiane': 'Gruppo FS' },
                 ig: { 'Vodafone It (https://instagram.com/vodafoneit)': 'Vodafone', 'TIM (https://instagram.com/timofficial)': 'Tim', 'Royal Mail 📮 (https://instagram.com/royalmailofficial)': 'Royal Mail', 'Poste Italiane (https://instagram.com/posteitaliane)': 'Poste Italiane', 'WINDTRE (https://instagram.com/windtre)': 'WindTre', 'Intesa Sanpaolo (https://instagram.com/intesasanpaolo)': 'Intesa Sanpaolo', 'Eni (https://instagram.com/eni)': 'Eni', 'Enel Group (https://instagram.com/enelgroup)': 'Enel', 'DHL Express Italy (https://instagram.com/dhlexpressitaly)': 'DHL Italia', 'Postepay (https://instagram.com/postepay)': 'Postepay', 'Banca Monte dei Paschi di Siena (https://instagram.com/banca_mps)': 'Banca MPS' }
             };
+            const cleanName = (row, platform) => { const originalName = String(row[0]).trim(); const platformMap = nameMaps[platform] || {}; const rewrittenName = platformMap[originalName] || originalName.split('(')[0].trim(); return { name: rewrittenName, value: row[1] }; };
 
-            const cleanName = (row, platform) => {
-                const originalName = String(row[0]).trim();
-                const platformMap = nameMaps[platform] || {};
-                const rewrittenName = platformMap[originalName] || originalName.split('(')[0].trim();
-                return { name: rewrittenName, value: row[1] };
-            };
-
-            const fbFollowersSheet = getSheetData(fansGlobaleWorkbook, 'FB Followers');
-            const fbData = fbFollowersSheet.slice(findRowIndex(fbFollowersSheet, 'vodafone')).map(r => cleanName(r, 'fb')).sort((a,b) => b.value - a.value);
-
-            const igFollowersSheet = getSheetData(fansGlobaleWorkbook, 'IG followers');
-            const igData = igFollowersSheet.slice(findRowIndex(igFollowersSheet, 'tim')).map(r => cleanName(r, 'ig')).sort((a,b) => b.value - a.value);
-
-            const xFollowersSheet = getSheetData(fansGlobaleWorkbook, 'X followers');
-            const xData = xFollowersSheet.slice(findRowIndex(xFollowersSheet, 'royal mail')).map(r => cleanName(r, 'x')).sort((a,b) => b.value - a.value);
-
-            const competitorSheet = getSheetData(competitorWorkbook, 'COMPETITORS');
-            const linkedInData = competitorSheet.slice(2).map(r => cleanName(r, 'li')).sort((a,b) => b.value - a.value);
-
-            function createTrendChart(containerId, data, title) {
-                const container = d3.select(containerId);
-                if (container.empty() || !data || data.length === 0) return;
-                container.selectAll("*").remove();
-
-                const width = 1580;
-                const height = 718;
-                const margin = { top: 120, right: 60, bottom: 200, left: 120 };
-
-                const svg = container.append("svg")
-                    .attr("width", "100%")
-                    .attr("height", "100%")
-                    .attr("viewBox", `0 0 ${width} ${height}`)
-                    .style("background", "#fff")
-                    .attr("class", "trend-chart");
-
-                const headerGroup = svg.append("g");
-                
-                headerGroup.append("text")
-                    .attr("x", 170)
-                    .attr("y", 95)
-                    .text(title || "ANDAMENTO CRESCITA")
-                    .attr("font-family", "var(--font-family)")
-                    .attr("font-size", "62px") 
-                    .attr("fill", "var(--chart-title-blue)")
-                    .style("text-transform", "uppercase");
-
-                headerGroup.append("line")
-                    .attr("x1", 165)
-                    .attr("y1", 110)
-                    .attr("x2", width - margin.right)
-                    .attr("y2", 110)
-                    .attr("stroke", "var(--chart-title-blue)")
-                    .attr("stroke-width", 3);
-
-                const xDomain = data.map(d => d[0]);
-                const yValues = data.map(d => d[1]);
-                const yMin = d3.min(yValues);
-                const yMax = d3.max(yValues);
-                const yPadding = (yMax - yMin) * 0.2;
-
-                // Modifica: Aggiunto padding(0.5) per distanziare la prima etichetta dall'asse
-                const x = d3.scalePoint()
-                    .domain(xDomain)
-                    .range([margin.left, width - margin.right])
-                    .padding(0.5);
-
-                const y = d3.scaleLinear()
-                    .domain([yMin - yPadding, yMax + yPadding])
-                    .range([height - margin.bottom, margin.top + 40]);
-
-                // Modifica: Formattazione asse Y in "K" con separatore e spazio (es. 3.150 K)
-                const yAxis = d3.axisLeft(y)
-                    .ticks(6)
-                    .tickFormat(d => {
-                        const val = Math.round(d / 1000);
-                        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' K';
-                    })
-                    .tickSize(-(width - margin.left - margin.right));
-
-                const yAxisGroup = svg.append("g")
-                    .attr("transform", `translate(${margin.left},0)`)
-                    .call(yAxis);
-                
-                yAxisGroup.select(".domain").remove();
-                yAxisGroup.selectAll(".tick line").attr("stroke", "#e0e0e0").attr("stroke-width", 2);
-                yAxisGroup.selectAll(".tick text").attr("fill", "#7b7b7a").attr("font-size", "30px").attr("dx", "-10");
-
-                // Rileva se i dati sono giornalieri (contengono /) o mensili
-                const isDaily = xDomain[0] && xDomain[0].includes('/');
-                const monthNames = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
-
-                let xAxisObj = d3.axisBottom(x);
-                
-                if (isDaily) {
-                    const oddDays = xDomain.filter(d => parseInt(d.split('/')[0]) % 2 !== 0);
-                    xAxisObj = xAxisObj.tickValues(oddDays).tickFormat(d => {
-                        const parts = d.split('/');
-                        const day = parseInt(parts[0], 10);
-                        const month = monthNames[parseInt(parts[1], 10) - 1];
-                        return `${day}-${month}`;
-                    });
-                } else {
-                    // Per dati mensili (es. gen-25) mostra tutto
-                    xAxisObj = xAxisObj.tickFormat(d => d);
-                }
-
-                const xAxisGroup = svg.append("g")
-                    .attr("transform", `translate(0,${height - margin.bottom})`)
-                    .call(xAxisObj);
-
-                xAxisGroup.select(".domain").attr("stroke", "#e0e0e0").attr("stroke-width", 2);
-                xAxisGroup.selectAll(".tick line").remove();
-                
-                const xLabels = xAxisGroup.selectAll(".tick text")
-                    .attr("fill", "#7b7b7a")
-                    .attr("font-size", "39px");
-
-                // Modifica: Rotazione verticale applicata a TUTTE le etichette (giornaliere e annuali)
-                xLabels
-                    .attr("transform", "rotate(-90)")
-                    .attr("text-anchor", "end")
-                    .attr("dx", "-10")
-                    .attr("dy", "-5");
-
-                const line = d3.line()
-                    .x(d => x(d[0]))
-                    .y(d => y(d[1]))
-                    .curve(d3.curveMonotoneX);
-
-                svg.append("path")
-                    .datum(data)
-                    .attr("fill", "none")
-                    .attr("stroke", "var(--chart-bar-blue)") 
-                    .attr("stroke-width", 10)
-                    .attr("d", line);
-            }
-
-            // Funzione per ricalcolare il report usando i dati WhatsApp attuali (chiusura su fileData corrente)
-            window.recalcWithWhatsapp = () => {
-                const wc = parseInt(document.getElementById('whatsapp-current').value, 10) || 0;
-                const wp = parseInt(document.getElementById('whatsapp-previous').value, 10) || 0;
-                processFiles(fileData, { current: wc, previous: wp });
-            };
+            const fbData = getSheetData(fansGlobaleWorkbook, 'FB Followers').slice(findRowIndex(getSheetData(fansGlobaleWorkbook, 'FB Followers'), 'vodafone')).map(r => cleanName(r, 'fb')).sort((a,b) => b.value - a.value);
+            const igData = getSheetData(fansGlobaleWorkbook, 'IG followers').slice(findRowIndex(getSheetData(fansGlobaleWorkbook, 'IG followers'), 'tim')).map(r => cleanName(r, 'ig')).sort((a,b) => b.value - a.value);
+            const xData = getSheetData(fansGlobaleWorkbook, 'X followers').slice(findRowIndex(getSheetData(fansGlobaleWorkbook, 'X followers'), 'royal mail')).map(r => cleanName(r, 'x')).sort((a,b) => b.value - a.value);
+            const linkedInData = getSheetData(competitorWorkbook, 'COMPETITORS').slice(2).map(r => cleanName(r, 'li')).sort((a,b) => b.value - a.value);
 
             const sections = {
                 'dati-generali': { title: 'Dati Generali Poste', content: `
                     <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
-                        <button class="nav-button" onclick="window.recalcWithWhatsapp()" style="background-color: #fff; color: var(--primary-ui-blue); border: 2px solid var(--primary-ui-blue); display: flex; align-items: center; gap: 0.5rem;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
-                            Aggiorna con dati WhatsApp
-                        </button>
+                        <button class="nav-button" onclick="window.recalcWithWhatsapp()" style="background-color: #fff; color: var(--primary-ui-blue); border: 2px solid var(--primary-ui-blue); display: flex; align-items: center; gap: 0.5rem;">Aggiorna WhatsApp</button>
                     </div>
                     <div class="data-grid">
-                        <div class="data-item">
-                            <h3>Dimensione totale community</h3>
-                            <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
-                            <p class="data-value" data-copy-target>${formatTotalCommunity(finalTotalCommunitySize)}</p>
-                        </div>
-                        <div class="data-item">
-                             <h3>Variazione vs Mese Prec.</h3>
-                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
-                            <p class="data-value ${String(relativeChange).includes('-') ? 'negative' : 'positive'}" data-copy-target>${String(relativeChange).replace('.', ',')}</p>
-                        </div>
-                        <div class="data-item">
-                             <h3>Crescita Totale nel Mese</h3>
-                             <button class="copy-button" title="Copia valore"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5h3z"/></svg></button>
-                            <p class="data-value positive" data-copy-target>+${formatNumber(finalTotalGrowth)}</p>
-                        </div>
+                        <div class="data-item"><h3>Dimensione totale community</h3><button class="copy-button" title="Copia valore"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button><p class="data-value" data-copy-target>${formatTotalCommunity(finalTotalCommunitySize)}</p></div>
+                        <div class="data-item"><h3>Variazione vs Mese Prec.</h3><button class="copy-button" title="Copia valore"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button><p class="data-value ${String(relativeChange).includes('-') ? 'negative' : 'positive'}" data-copy-target>${String(relativeChange).replace('.', ',')}</p></div>
+                        <div class="data-item"><h3>Crescita Totale nel Mese</h3><button class="copy-button" title="Copia valore"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button><p class="data-value positive" data-copy-target>+${formatNumber(finalTotalGrowth)}</p></div>
                     </div>
+                    <details style="background: #f8f9fc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 2rem;"><summary style="cursor: pointer; font-weight: 700; color: var(--primary-ui-blue); outline: none;">Visualizza tabella Crescita giornaliera</summary><div style="margin-top: 1rem;">${dailyGrowthTableHTML}</div></details>
                     
-                    <details style="background: #f8f9fc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
-                        <summary style="cursor: pointer; font-weight: 700; color: var(--primary-ui-blue); outline: none;">Visualizza tabella Crescita giornaliera</summary>
-                        <div style="margin-top: 1rem;">
-                            ${dailyGrowthTableHTML}
-                        </div>
-                    </details>
-
                     <div class="chart-wrapper">
-                         <div class="chart-controls">
-                             <button class="export-svg-btn" data-chart-id="trend-chart-container" title="Esporta SVG">Esporta SVG</button>
-                             <button class="copy-svg-btn" data-chart-id="trend-chart-container" title="Copia Grafico">Copia Grafico</button>
-                         </div>
-                         <div class="chart-container" id="trend-chart-container"></div>
+                        <div class="chart-controls">
+                            <button class="export-svg-btn" data-chart-id="trend-chart-container" title="Esporta SVG">Esporta SVG</button>
+                            <button class="copy-svg-btn" data-chart-id="trend-chart-container" title="Copia Grafico">Copia Grafico</button>
+                        </div>
+                        <div class="chart-container" id="trend-chart-container"></div>
                     </div>
 
                     <div class="chart-wrapper" style="margin-top: 2rem;">
@@ -1316,16 +629,7 @@
                          <div class="chart-container" id="annual-trend-chart-container"></div>
                     </div>
                 ` },
-                'dati-piattaforma': { title: 'Dati per Piattaforma', content: `
-                    <div class="chart-wrapper" style="margin-bottom: 1.5rem;">
-                         <div class="chart-controls">
-                             <button class="export-svg-btn" data-chart-id="piattaforma-chart-container" title="Esporta SVG">Esporta SVG</button>
-                             <button class="copy-svg-btn" data-chart-id="piattaforma-chart-container" title="Copia Grafico">Copia Grafico</button>
-                         </div>
-                         <div class="chart-container" id="piattaforma-chart-container"></div>
-                    </div>
-                    ${createTableHTML(platformData, ['Piattaforma', 'Followers'], 'Followers per Piattaforma')}
-                ` },
+                'dati-piattaforma': { title: 'Dati per Piattaforma', content: `<div class="chart-wrapper" style="margin-bottom: 1.5rem;"><div class="chart-controls"><button class="export-svg-btn" data-chart-id="piattaforma-chart-container" title="Esporta SVG">Esporta SVG</button><button class="copy-svg-btn" data-chart-id="piattaforma-chart-container" title="Copia Grafico">Copia Grafico</button></div><div class="chart-container" id="piattaforma-chart-container"></div></div>${createTableHTML(platformData, ['Piattaforma', 'Followers'], 'Followers per Piattaforma')}` },
                 'benchmark-fb': { title: 'Benchmark Facebook', data: fbData, chartTitle: 'FACEBOOK' },
                 'benchmark-ig': { title: 'Benchmark Instagram', data: igData, chartTitle: 'INSTAGRAM' },
                 'benchmark-x': { title: 'Benchmark X', data: xData, chartTitle: 'X' },
@@ -1336,133 +640,50 @@
             for (const [id, section] of Object.entries(sections)) {
                 const button = document.createElement('button');
                 button.className = `nav-button ${isFirst ? 'active' : ''}`;
-                button.textContent = section.title;
-                button.dataset.section = id;
+                button.textContent = section.title; button.dataset.section = id;
                 buttonNav.appendChild(button);
-
                 const sectionDiv = document.createElement('div');
-                sectionDiv.id = id;
-                sectionDiv.className = `report-section ${!isFirst ? 'hidden' : ''}`;
-                
+                sectionDiv.id = id; sectionDiv.className = `report-section ${!isFirst ? 'hidden' : ''}`;
                 if (id.startsWith('benchmark-')) {
-                   sectionDiv.innerHTML = `
-                     <div class="chart-wrapper">
-                         <div class="chart-controls">
-                             <button class="export-svg-btn" data-chart-id="${id}-chart-container" title="Esporta SVG">Esporta SVG</button>
-                             <button class="copy-svg-btn" data-chart-id="${id}-chart-container" title="Copia Grafico">Copia Grafico</button>
-                         </div>
-                         <div class="chart-container" id="${id}-chart-container"></div>
-                     </div>
-                     ${createTableHTML(section.data.map(d => [d.name, d.value]), ['Pagina', 'Followers'], section.title)}
-                   `;
-                } else {
-                    sectionDiv.innerHTML = section.content;
-                }
+                   sectionDiv.innerHTML = `<div class="chart-wrapper"><div class="chart-controls"><button class="export-svg-btn" data-chart-id="${id}-chart-container" title="Esporta SVG">Esporta SVG</button><button class="copy-svg-btn" data-chart-id="${id}-chart-container" title="Copia Grafico">Copia Grafico</button></div><div class="chart-container" id="${id}-chart-container"></div></div>${createTableHTML(section.data.map(d => [d.name, d.value]), ['Pagina', 'Followers'], section.title)}`;
+                } else { sectionDiv.innerHTML = section.content; }
                 sectionsWrapper.appendChild(sectionDiv);
                 
                 if (id.startsWith('benchmark-')) {
-                   createBenchmarkChart(`#${id}-chart-container`, section.data, section.chartTitle);
+                    createBenchmarkChart(`#${id}-chart-container`, section.data, section.chartTitle);
                 } else if (id === 'dati-generali') {
                     createTrendChart('#trend-chart-container', dailyGrowthData, "ANDAMENTO CRESCITA ULTIMO MESE");
+                    // Creazione del grafico annuale se ci sono dati
                     if (monthlyTrendData.length > 0) {
                         createTrendChart('#annual-trend-chart-container', monthlyTrendData, "ANDAMENTO CRESCITA ULTIMI 12 MESI");
                     }
                 }
                 isFirst = false;
             }
-            
-            // --- INIZIO NUOVA FUNZIONALITÀ EXECUTIVE SUMMARY ---
-            const execSummaryBtn = document.createElement('button');
-            execSummaryBtn.textContent = 'Executive Summary';
-            execSummaryBtn.className = 'nav-button exec-summary-btn'; 
+
+            const execSummaryBtn = document.createElement('button'); execSummaryBtn.textContent = 'Executive Summary'; execSummaryBtn.className = 'nav-button exec-summary-btn';
             execSummaryBtn.onclick = () => {
-                const now = new Date();
-                const pad = n => String(n).padStart(2, '0');
+                const now = new Date(); const pad = n => String(n).padStart(2, '0');
                 const timestamp = `${now.getFullYear()}_${pad(now.getMonth()+1)}_${pad(now.getDate())}_${pad(now.getHours())}_${pad(now.getMinutes())}`;
                 const filename = `ES1_${timestamp}.json`;
-
-                // Helper per cercare il valore di una piattaforma in modo flessibile
-                const findVal = (keyword) => {
-                    // Cerca nelle righe di platformData se la prima colonna contiene la keyword
-                    const row = platformData.find(r => r[0] && String(r[0]).toLowerCase().includes(keyword.toLowerCase()));
-                    return row ? row[1] : 0;
-                };
-
-                // Helper specifico per trovare X / Twitter in modo più robusto
-                const findXValue = () => {
-                    const row = platformData.find(r => {
-                         if (!r[0]) return false;
-                         const name = String(r[0]).toLowerCase().trim();
-                         // Cerca 'twitter', oppure 'x' esatto, oppure 'x' seguito da spazio (es. 'X (Twitter)')
-                         return name.includes('twitter') || name === 'x' || name.startsWith('x ');
-                    });
-                    return row ? row[1] : 0;
-                };
-
-                // Costruzione dell'oggetto JSON secondo le specifiche
-                const exportData = {
-                    "Numero Complessivo Iscritti": formatSmartNumber(finalTotalCommunitySize),
-                    "Iscritti Facebook": formatSmartNumber(findVal('facebook')),
-                    "Iscritti X (Twitter)": formatSmartNumber(findXValue()), 
-                    "Iscritti Linkedin": formatSmartNumber(findVal('linkedin')),
-                    "Iscritti Instagram": formatSmartNumber(findVal('instagram')),
-                    "Iscritti Whatsapp": formatSmartNumber(findVal('whatsapp')),
-                    "Iscritti YouTube": formatSmartNumber(findVal('youtube'))
-                };
-
-                // Creazione e download del file
-                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                const findVal = (keyword) => { const row = platformData.find(r => r[0] && String(r[0]).toLowerCase().includes(keyword.toLowerCase())); return row ? row[1] : 0; };
+                const findXValue = () => { const row = platformData.find(r => { if (!r[0]) return false; const name = String(r[0]).toLowerCase().trim(); return name.includes('twitter') || name === 'x' || name.startsWith('x '); }); return row ? row[1] : 0; };
+                const exportData = { "Numero Complessivo Iscritti": formatSmartNumber(finalTotalCommunitySize), "Iscritti Facebook": formatSmartNumber(findVal('facebook')), "Iscritti X (Twitter)": formatSmartNumber(findXValue()), "Iscritti Linkedin": formatSmartNumber(findVal('linkedin')), "Iscritti Instagram": formatSmartNumber(findVal('instagram')), "Iscritti Whatsapp": formatSmartNumber(findVal('whatsapp')), "Iscritti YouTube": formatSmartNumber(findVal('youtube')) };
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
             };
             buttonNav.appendChild(execSummaryBtn);
-            // --- FINE NUOVA FUNZIONALITÀ ---
-            
-            // Rendering asincrono del grafico per attendere il caricamento dei loghi
-            createPlatformChart('#piattaforma-chart-container', platformData, 'FOLLOWERS PER PIATTAFORMA');
 
+            createPlatformChart('#piattaforma-chart-container', platformData, 'FOLLOWERS PER PIATTAFORMA');
             reportContent.classList.remove('hidden');
         }
 
-        function createTableHTML(data, headers, title) {
-            let tableRows = data.map(row => `<tr>${row.map(cell => {
-                const isNumeric = typeof cell === 'number';
-                const formattedCell = isNumeric ? formatNumberWithThousands(cell) : cell;
-                const rawValueAttr = isNumeric ? `data-raw-value="${cell}"` : '';
-                return `<td ${rawValueAttr}>${formattedCell}</td>`;
-            }).join('')}</tr>`).join('');
-            return `
-                <div class="table-wrapper">
-                    <button class="copy-button" title="Copia tabella"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button>
-                    <h3>${title}</h3>
-                    <table data-copy-target>
-                        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-                        <tbody>${tableRows}</tbody>
-                    </table>
-                </div>
-            `;
-        }
+        window.recalcWithWhatsapp = () => {
+            alert("Ricarica tutti i file per aggiornare correttamente i dati.");
+        };
 
-        function showFeedbackOnCopyButton(button, message) {
-            const originalContent = button.innerHTML;
-            button.innerHTML = message;
-            setTimeout(() => {
-                button.innerHTML = originalContent;
-            }, 1500);
-        }
-        
         buttonNav.addEventListener('click', (e) => {
             const clickedButton = e.target.closest('.nav-button');
-            if (!clickedButton) return;
-            // Se è il tasto executive summary non fare tab switching
-            if (clickedButton.classList.contains('exec-summary-btn')) return;
-            
+            if (!clickedButton || clickedButton.classList.contains('exec-summary-btn')) return;
             const sectionId = clickedButton.dataset.section;
             document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
             clickedButton.classList.add('active');
@@ -1478,43 +699,24 @@
                 const parentWrapper = copyBtn.closest('.data-item, .table-wrapper');
                 const target = parentWrapper.querySelector('[data-copy-target]');
                 if (!target) return;
-                
                 let textToCopy = '';
                 if (target.tagName === 'TABLE') {
                     const rows = target.querySelectorAll('tr');
                     rows.forEach(row => {
                         const cells = row.querySelectorAll('th, td');
-                        const rowText = Array.from(cells).map(cell => {
-                            return cell.dataset.rawValue || cell.innerText.trim();
-                        }).join('\t');
+                        const rowText = Array.from(cells).map(cell => { return cell.dataset.rawValue || cell.innerText.trim(); }).join('\t');
                         textToCopy += rowText + '\n';
                     });
-                } else {
-                    textToCopy = target.innerText.trim();
-                }
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    showFeedbackOnCopyButton(copyBtn, 'OK!');
-                }).catch(err => {
-                    console.error('Errore durante la copia:', err);
-                    showFeedbackOnCopyButton(copyBtn, 'Err');
-                });
+                } else { textToCopy = target.innerText.trim(); }
+                navigator.clipboard.writeText(textToCopy).then(() => showFeedbackOnCopyButton(copyBtn, 'OK!')).catch(err => showFeedbackOnCopyButton(copyBtn, 'Err'));
             } else if (exportBtn) {
                 const chartContainerId = exportBtn.dataset.chartId;
                 const svgElement = document.querySelector(`#${chartContainerId} svg`);
-                if(svgElement) {
-                    exportSvg(svgElement, `${chartContainerId}.svg`);
-                    showFeedbackOnCopyButton(exportBtn, 'OK!');
-                } else {
-                    showFeedbackOnCopyButton(exportBtn, 'Err!');
-                }
+                if(svgElement) { exportSvg(svgElement, `${chartContainerId}.svg`); showFeedbackOnCopyButton(exportBtn, 'OK!'); } else { showFeedbackOnCopyButton(exportBtn, 'Err!'); }
             } else if (copyChartBtn) {
                  const chartContainerId = copyChartBtn.dataset.chartId;
                  const svgElement = document.querySelector(`#${chartContainerId} svg`);
-                 if(svgElement) {
-                    copySvgToClipboard(svgElement, copyChartBtn);
-                 } else {
-                    showFeedbackOnCopyButton(copyChartBtn, 'Err!');
-                 }
+                 if(svgElement) { copySvgToClipboard(svgElement, copyChartBtn); } else { showFeedbackOnCopyButton(copyChartBtn, 'Err!'); }
             }
         });
     });
