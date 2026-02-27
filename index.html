@@ -345,7 +345,7 @@
             const xDomain = data.map(d => d[0]);
             const yValues = data.map(d => d[1]);
             const x = d3.scalePoint().domain(xDomain).range([margin.left, width - margin.right]).padding(0.5);
-            const y = d3.scaleLinear().domain([d3.min(yValues) * 0.99, d3.max(yValues) * 1.01]).range([height - margin.bottom, margin.top + 40]);
+            const y = d3.scaleLinear().domain([d3.min(yValues) - 50, d3.max(yValues) + 50]).range([height - margin.bottom, margin.top + 40]);
             const yAxis = d3.axisLeft(y).ticks(6).tickFormat(d => { const val = Math.round(d / 1000); return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' K'; }).tickSize(-(width - margin.left - margin.right));
             const yAxisGroup = svg.append("g").attr("transform", `translate(${margin.left},0)`).call(yAxis);
             yAxisGroup.select(".domain").remove(); yAxisGroup.selectAll(".tick line").attr("stroke", "#e0e0e0").attr("stroke-width", 2); yAxisGroup.selectAll(".tick text").attr("fill", "#7b7b7a").attr("font-size", "30px").attr("dx", "-10");
