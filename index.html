@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Mensile Followers</title>
-    <link rel="icon" href="favicon.ico">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,700&display=swap" rel="stylesheet">
@@ -74,44 +74,173 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         #logos-status { margin-top: 1rem; font-size: 0.9rem; font-weight: bold; color: #28a745; display: none; }
+
+        :root { --primary-ui-blue:#153d70; --primary-ui-yellow:#ffda4a; --background-color:#f4f6fa; --border-color:#e2e8f0; --text-color:#23344a; }
+        html { scroll-behavior:smooth; scroll-padding-top:24px; }
+        body { font-size:15px; }
+        button,input,summary { font:inherit; }
+        button,a,input,summary,.drop-zone { -webkit-tap-highlight-color:transparent; }
+        :focus-visible { outline:3px solid #3b82f6; outline-offset:4px; }
+        header { padding:0; background:#fff; color:var(--primary-ui-blue); border-bottom:1px solid var(--border-color); text-align:left; }
+        .header-inner { max-width:1280px; margin:auto; padding:20px 32px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+        .brand { display:flex; align-items:center; gap:12px; font-weight:800; font-size:19px; letter-spacing:-.6px; }
+        .brand-mark { display:grid; place-items:center; width:38px; height:38px; border-radius:12px; background:var(--primary-ui-blue); color:var(--primary-ui-yellow); }
+        .brand small { display:block; font-size:10px; text-transform:uppercase; letter-spacing:1.9px; color:#687b91; }
+        .help-link { text-decoration:none; color:var(--primary-ui-blue); border:1px solid var(--border-color); padding:8px 15px; border-radius:9px; font-size:13px; font-weight:700; background:white; cursor:pointer; }
+        .help-link:hover { background:#edf3fb; }
+        .main-container { max-width:1280px; padding:0 32px; margin:42px auto; }
+        .eyebrow { color:#55708f; text-transform:uppercase; font-size:11px; font-weight:800; letter-spacing:1.8px; }
+        .hero { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:28px; }
+        h1 { font-size:clamp(28px,3.2vw,40px); line-height:1.2; font-weight:800; letter-spacing:-1.4px; margin:9px 0 12px; color:#183354; }
+        .hero p { color:#63758b; max-width:640px; font-size:15px; }
+        .local-badge { flex-shrink:0; color:#3e6455; background:#e9f4ee; padding:8px 12px; border-radius:30px; font-size:12px; font-weight:700; }
+        .steps { display:flex; gap:8px; align-items:center; margin:0 0 28px; padding:15px 20px; border:1px solid var(--border-color); border-radius:12px; background:#fff; }
+        .step { display:flex; align-items:center; gap:10px; flex:1; color:#65778c; font-size:13px; font-weight:700; }
+        .step span { display:grid; place-items:center; width:26px; height:26px; background:#eef2f8; border-radius:50%; font-size:12px; }
+        .step:first-child { color:var(--primary-ui-blue); }
+        .step:first-child span { background:var(--primary-ui-blue); color:#fff; }
+        .step-arrow { color:#b2bfce; margin-right:20px; }
+        .setup-grid { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr); gap:22px; align-items:start; }
+        .upload-section { text-align:left; padding:25px; border-radius:16px; border:1px solid var(--border-color); box-shadow:0 3px 10px #20385903; margin:0; min-width:0; }
+        .section-heading { display:flex; gap:12px; align-items:center; margin-bottom:18px; }
+        .section-number { width:32px; height:32px; flex-shrink:0; display:grid; place-items:center; background:#edf3fb; color:var(--primary-ui-blue); border-radius:9px; font-size:13px; font-weight:800; }
+        .upload-section h2 { font-size:17px; line-height:1.4; margin:0; font-weight:800; letter-spacing:-.3px; }
+        .section-caption { font-size:12px; color:#718198; margin-top:3px; }
+        .drop-zone { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:225px; padding:24px 14px; background:#f8faff; border:1.5px dashed #b6c7dd; border-radius:12px; text-align:center; }
+        .drop-zone:hover,.drop-zone.dragover { border-color:#2b64a5; background:#eef4ff; }
+        .upload-icon { width:44px; height:44px; border-radius:13px; background:#e9effa; color:#315c92; display:grid; place-items:center; margin-bottom:12px; }
+        .drop-zone p { font-size:15px; color:#314d70; font-weight:700; }
+        .drop-zone .upload-hint { font-size:12px; color:#7a8ba1; margin-top:10px; font-weight:400; }
+        .select-file { display:inline-block; background:var(--primary-ui-blue); color:#fff; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; margin-top:15px; }
+        .file-note { color:#64778d; font-size:12px; margin-top:14px; }
+        .file-note strong { color:#365575; }
+        .optional-tag { color:#6c7b8d; background:#f0f3f7; font-size:10px; padding:3px 8px; border-radius:20px; margin-left:auto; }
+        .wa-description { color:#697b90; font-size:13px; margin-bottom:20px; }
+        .wa-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .wa-fields label { display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:#52667d; }
+        .wa-fields input { width:100%; min-width:0; padding:11px 12px; border:1px solid #d6dfeb; border-radius:9px; color:#183354; background:#fff; }
+        .wa-fields input:focus { outline:3px solid #dbeafe; border-color:#4379bd; }
+        .wa-tip { font-size:12px; color:#6c7f95; margin-top:16px; padding-top:16px; border-top:1px solid var(--border-color); }
+        .wa-update { display:block; width:100%; border:1px solid #ccd9e8; border-radius:8px; background:#f5f8fc; color:var(--primary-ui-blue); padding:9px; font-size:12px; font-weight:700; margin-top:14px; cursor:pointer; }
+        .wa-update:disabled { opacity:.5; cursor:default; }
+        #file-list { list-style:none; margin:14px 0 0; padding:0; display:grid; gap:7px; }
+        .file-row { display:flex; align-items:center; justify-content:space-between; gap:12px; background:#f5f8fc; padding:9px 11px; border-radius:8px; font-size:12px; }
+        .file-row span:first-child { overflow-wrap:anywhere; }
+        .file-kind { color:#38634d; flex-shrink:0; font-weight:700; }
+        .status-message { padding:12px 15px; border-radius:10px; margin:18px 0 0; font-size:13px; background:#edf3fb; color:#345a87; }
+        .status-message:empty { display:none; }
+        .status-message.error { background:#fff0ef; color:#a53232; }
+        .status-message.success { background:#eaf5ee; color:#2d674c; }
+        #report-content { margin-top:32px; }
+        .report-heading { display:flex; align-items:center; gap:10px; margin-bottom:16px; font-size:21px; color:#183354; font-weight:800; letter-spacing:-.5px; }
+        .report-heading span { font-size:11px; color:#367557; border-radius:20px; background:#e4f1e9; padding:3px 9px; letter-spacing:0; }
+        .button-nav { justify-content:flex-start; gap:7px; margin-bottom:20px; }
+        .nav-button { border:1px solid #dce4ef; border-radius:8px; padding:9px 13px; font-size:12px; background:#fff; }
+        .nav-button:hover { background:#eaf1fb; color:var(--primary-ui-blue); border-color:#abc1de; }
+        .nav-button.active { background:var(--primary-ui-blue); color:white; border-color:var(--primary-ui-blue); }
+        .exec-summary-btn { margin-left:auto; background:var(--primary-ui-yellow); border-color:var(--primary-ui-yellow); }
+        .report-section { border:1px solid var(--border-color); box-shadow:none; border-radius:16px; padding:24px; }
+        .data-item,.chart-wrapper,.table-wrapper { background:#fff; border-color:var(--border-color); border-radius:12px; }
+        .data-item { background:#f6f9fd; }
+        .data-item h3 { font-size:12px; border:0; padding:0 20px 0 0; margin-bottom:12px; color:#63788f; }
+        .data-value { font-size:34px; letter-spacing:-1px; }
+        .positive { color:#23754f; } .negative { color:#bf3b3b; }
+        .copy-button { width:28px; height:28px; border:0; border-radius:7px; background:#eaf0f7; }
+        .chart-wrapper { margin-bottom:16px; }
+        .chart-container { overflow-x:auto; }
+        .chart-container svg { display:block; }
+        .chart-controls { flex-wrap:wrap; }
+        .chart-controls .export-svg-btn,.chart-controls .copy-svg-btn { border-radius:7px; font-size:11px; }
+        .table-wrapper { overflow-x:auto; margin-top:18px; }
+        .table-wrapper h3 { border:0; padding-right:24px; }
+        th { font-size:11px; letter-spacing:.5px; text-transform:uppercase; background:#f1f5fa; }
+        td { font-size:13px; }
+        tbody tr:hover { background:#f6f9fd; }
+        .guide { background:#fff; border:1px solid var(--border-color); border-radius:16px; margin-top:26px; overflow:hidden; }
+        .guide > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:14px; padding:21px 25px; }
+        .guide > summary::-webkit-details-marker { display:none; }
+        .guide-icon { width:36px; height:36px; border-radius:10px; background:#fff7d4; color:#8b6c10; display:grid; place-items:center; font-weight:800; font-size:18px; }
+        .guide-title { display:block; font-size:15px; font-weight:800; color:#233e5f; }
+        .guide-subtitle { display:block; font-size:12px; color:#718198; margin-top:2px; }
+        .guide-toggle { margin-left:auto; font-size:22px; color:#7b8da3; }
+        .guide[open] .guide-toggle { transform:rotate(45deg); }
+        .guide-body { padding:0 25px 25px; border-top:1px solid var(--border-color); }
+        .guide-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px 36px; padding-top:23px; }
+        .guide h3 { font-size:14px; font-weight:800; color:#24476e; margin-bottom:8px; }
+        .guide p,.guide li { color:#60738a; font-size:13px; }
+        .guide ul { padding-left:18px; margin-top:9px; }
+        .guide li { margin:6px 0; }
+        .guide code { font-size:11px; background:#f0f4f9; border-radius:4px; padding:2px 4px; overflow-wrap:anywhere; }
+        .guide details { margin-top:20px; padding:14px 16px; background:#f7f9fc; border-radius:10px; }
+        .guide details summary { cursor:pointer; color:#345575; font-size:13px; font-weight:700; }
+        .guide details p { margin-top:10px; }
+        .guide-warning { margin-top:20px; padding:13px 16px; border-left:3px solid var(--primary-ui-yellow); background:#fffbec; }
+        footer { color:#8492a4; font-size:11px; text-align:center; padding:25px 0 0; }
+        #loader { background:#f4f7fbe8; backdrop-filter:blur(4px); flex-direction:column; gap:15px; color:#345575; font-size:14px; }
+        .spinner { width:40px; height:40px; border-width:4px; }
+        #logos-status { font-size:12px; }
+        @media(max-width:760px) {
+            .header-inner { padding:15px 20px; } .main-container { margin:26px auto; padding:0 18px; }
+            .hero { align-items:flex-start; flex-direction:column; gap:14px; } .hero p { font-size:14px; }
+            .setup-grid,.guide-grid { grid-template-columns:1fr; } .upload-section,.report-section { padding:20px; }
+            .steps { padding:13px 12px; gap:8px; } .step { font-size:11px; gap:6px; } .step span { width:22px; height:22px; flex-shrink:0; } .step-arrow { display:none; }
+            .exec-summary-btn { margin-left:0; } .button-nav { gap:6px; } .nav-button { font-size:11px; }
+            .guide > summary { padding:18px; } .guide-body { padding:0 18px 20px; } .guide-subtitle { font-size:11px; }
+            .data-grid { grid-template-columns:1fr; gap:12px; } .brand { font-size:16px; } .help-link { font-size:12px; padding:7px 10px; }
+            .chart-container svg { min-width:660px; height:auto; }
+            .chart-container::after { content:'Scorri il grafico lateralmente per vedere tutti i dati →'; display:block; font-size:11px; color:#718198; margin-top:10px; width:240px; }
+        }
+        @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { transition:none!important; animation-duration:.01ms!important; } }
+
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="spinner"></div></div>
-
-    <header>
-        <h1 class="text-3xl font-bold">Report Mensile Followers</h1>
-    </header>
-
+    <div id="loader" role="status" aria-live="polite"><div class="spinner" aria-hidden="true"></div><p>Elaborazione del report…</p></div>
+    <header><div class="header-inner">
+        <div class="brand"><span class="brand-mark" aria-hidden="true"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 18v-5m7 5V6m7 12V9"/></svg></span><div>Followers Report<small>Social intelligence</small></div></div>
+        <a href="#guida" class="help-link" id="open-guide">Guida all’uso ↗</a>
+    </div></header>
     <main class="main-container">
-        <section class="upload-section" id="whatsapp-input-section">
-            <h2>Dati Canale WhatsApp (Opzionale)</h2>
-            <div class="grid md:grid-cols-2 gap-6 max-w-lg mx-auto">
-                <div>
-                    <label for="whatsapp-previous" class="block text-sm font-medium text-gray-700 text-left mb-1">Iscritti mese precedente</label>
-                    <input type="number" id="whatsapp-previous" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Es. 1200">
+        <div class="hero"><div><div class="eyebrow">Il tuo report mensile</div><h1>La tua community, a colpo d’occhio.</h1><p>Riunisci i dati social, confronta le piattaforme e prepara i grafici per il tuo prossimo report.</p></div><div class="local-badge">● Elaborazione nel browser</div></div>
+        <div class="steps" aria-label="Come iniziare"><div class="step"><span>1</span>Carica i report</div><span class="step-arrow" aria-hidden="true">→</span><div class="step"><span>2</span>Esplora i risultati</div><span class="step-arrow" aria-hidden="true">→</span><div class="step"><span>3</span>Esporta e condividi</div></div>
+        <div class="setup-grid">
+            <section class="upload-section" aria-labelledby="upload-title">
+                <div class="section-heading"><span class="section-number" aria-hidden="true">01</span><div><h2 id="upload-title">Carica i tuoi dati</h2><p class="section-caption">Report Fans globale e Competitor · entrambi richiesti</p></div></div>
+                <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Seleziona file Excel, CSV o JSON" aria-describedby="upload-formats">
+                    <input type="file" id="file-input" multiple class="file-input" accept=".xlsx,.xls,.csv,.json" tabindex="-1" aria-label="File del report">
+                    <span class="upload-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"/></svg></span>
+                    <p>Trascina qui i tuoi file</p><span class="select-file">Seleziona i file</span>
+                    <p class="upload-hint" id="upload-formats">Excel (.xlsx, .xls), CSV e loghi (.json)</p>
+                    <div id="logos-status">✓ Loghi pronti per i grafici</div>
                 </div>
-                <div>
-                    <label for="whatsapp-current" class="block text-sm font-medium text-gray-700 text-left mb-1">Iscritti mese corrente</label>
-                    <input type="number" id="whatsapp-current" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Es. 1500">
-                </div>
-            </div>
-        </section>
-        
-        <section class="upload-section">
-            <h2>Carica i file Excel e i Loghi (JSON)</h2>
-            <div id="drop-zone" class="drop-zone">
-                <input type="file" id="file-input" multiple class="file-input" accept=".xlsx, .xls, .csv, .json">
-                <p>Trascina qui i file Excel e il file 'loghi_ok.json'</p>
-                <div id="logos-status">✓ File loghi caricato correttamente</div>
-            </div>
-        </section>
-
-        <div id="report-content" class="hidden">
-            <nav id="button-nav" class="button-nav"></nav>
-            <div id="sections-wrapper"></div>
+                <p class="file-note"><strong>Puoi aggiungere file in più passaggi.</strong> Annuale, WhatsApp e loghi sono facoltativi. Per un nuovo mese, usa “Nuovo report”.</p>
+                <ul id="file-list" aria-label="File caricati"></ul>
+                <button type="button" class="help-link" id="reset-report" hidden style="margin-top:12px">Nuovo report</button>
+            </section>
+            <section class="upload-section" id="whatsapp-input-section" aria-labelledby="wa-title">
+                <div class="section-heading"><span class="section-number" aria-hidden="true">02</span><h2 id="wa-title">Canale WhatsApp</h2><span class="optional-tag">Facoltativo</span></div>
+                <p class="wa-description">Includi gli iscritti WhatsApp nel totale della community e nella variazione mensile.</p>
+                <div class="wa-fields"><div><label for="whatsapp-previous">Mese precedente</label><input type="number" id="whatsapp-previous" min="0" step="1" inputmode="numeric" placeholder="Es. 1200"></div><div><label for="whatsapp-current">Mese corrente</label><input type="number" id="whatsapp-current" min="0" step="1" inputmode="numeric" placeholder="Es. 1500"></div></div>
+                <p class="wa-tip">Compila prima del caricamento oppure aggiorna il report dopo aver modificato i valori. Lascia vuoto se non vuoi includere il canale.</p>
+                <button type="button" id="update-whatsapp" class="wa-update" disabled>Aggiorna il report con WhatsApp</button>
+            </section>
         </div>
+        <div id="app-status" class="status-message" role="status" aria-live="polite"></div>
+        <div id="report-content" class="hidden"><h2 class="report-heading">Il tuo report <span>Pronto</span></h2><nav id="button-nav" class="button-nav" aria-label="Sezioni del report"></nav><div id="sections-wrapper"></div></div>
+        <details class="guide" id="guida">
+            <summary><span class="guide-icon" aria-hidden="true">?</span><span><span class="guide-title">Tutto quello che serve per iniziare</span><span class="guide-subtitle">File richiesti, lettura dei risultati ed esportazione</span></span><span class="guide-toggle" aria-hidden="true">+</span></summary>
+            <div class="guide-body"><div class="guide-grid">
+                <div><h3>1. Prepara i file richiesti</h3><p>Usa gli export originali, conservando nomi dei fogli e struttura delle righe. Il riconoscimento avviene dai fogli interni, non dal nome del file.</p><ul><li><strong>Report Fans globale:</strong> deve contenere <code>Total community size</code>, <code>Fans Poste per piattaforma</code>, <code>Fans Poste Crescita</code>, <code>FB Followers</code>, <code>IG followers</code> e <code>X followers</code>.</li><li><strong>Competitor:</strong> deve contenere il foglio <code>COMPETITORS</code>, con due righe iniziali prima dei dati.</li><li>Per i due report richiesti scegli Excel: un CSV contiene un solo foglio e non sostituisce il report completo.</li></ul></div>
+                <div><h3>2. Aggiungi i dati facoltativi</h3><ul><li><strong>WhatsApp:</strong> inserisci gli iscritti dei due mesi oppure carica un file con “whatsapp” nel nome. Nel primo foglio: data in colonna A, iscritti in B. Servono almeno due righe; vengono usate le ultime due date. Per il confronto mensile, usa le rilevazioni di fine mese.</li><li><strong>Storico:</strong> carica un Excel con nome che inizia per <code>annuale</code>. Nel primo foglio: data (gg/mm/aaaa o data Excel) in A e iscritti in B. Lo storico integra gli 11 mesi precedenti al mese corrente.</li><li><strong>Loghi:</strong> aggiungi <code>loghi_ok.json</code> con struttura <code>{"logos":{"facebook":{"base64":"data:image/png;base64,…"}}}</code>. Chiavi: facebook, instagram, linkedin, x, youtube, whatsapp.</li></ul></div>
+                <div><h3>3. Esplora il report</h3><p>Il report si genera automaticamente quando entrambi i file richiesti sono disponibili. I caricamenti successivi aggiungono dati o sostituiscono i file con lo stesso nome.</p><ul><li><strong>Dati Generali:</strong> totale della community, variazione percentuale e crescita mensile. Espandi le tabelle per il dettaglio giornaliero e annuale.</li><li><strong>Dati per Piattaforma:</strong> distribuzione degli iscritti per canale.</li><li><strong>Benchmark:</strong> confronta Facebook, Instagram, X e LinkedIn con i competitor.</li></ul></div>
+                <div><h3>4. Porta i risultati nel tuo lavoro</h3><ul><li><strong>Copia valore / tabella:</strong> usa l’icona in alto a destra della scheda. Le tabelle si incollano in Excel con le colonne separate.</li><li><strong>Esporta SVG:</strong> scarica il grafico in formato vettoriale. <strong>Copia Grafico</strong> lo copia come immagine, se il browser lo consente.</li><li><strong>Excel annuale e mese:</strong> espandi la sezione annuale e scarica i dati con i pulsanti dedicati.</li><li><strong>Executive Summary:</strong> scarica un JSON con totale e iscritti per piattaforma. K indica migliaia, M milioni; i valori sono abbreviati.</li></ul></div>
+            </div>
+            <p class="guide-warning"><strong>Come leggere WhatsApp:</strong> i valori manuali si sommano a quelli del report Excel. Non inserirli se sono già inclusi. Nel grafico giornaliero, la crescita WhatsApp è distribuita uniformemente nel mese: è una stima, non una rilevazione quotidiana.</p>
+            <details><summary>Problemi frequenti e requisiti</summary><p><strong>Report non generato:</strong> verifica che entrambi i file richiesti siano caricati e che i fogli abbiano esattamente i nomi indicati. Non rinominare i fogli né spostare le righe del modello originale.</p><p><strong>Copia non disponibile:</strong> il browser può limitare l’accesso agli appunti; usa “Esporta SVG” per scaricare il grafico.</p><p><strong>Nuovo mese:</strong> usa “Nuovo report” per svuotare file, loghi e valori WhatsApp prima del nuovo caricamento.</p><p><strong>Connessione e dati:</strong> è necessaria Internet per caricare le librerie e i caratteri esterni. I file selezionati vengono letti nel browser, senza invio a un server da parte dell’app. I dati caricati non vengono conservati dopo la chiusura o l’aggiornamento della pagina.</p></details>
+            </div>
+        </details>
+        <footer>Followers Report · Analisi mensile della community</footer>
     </main>
 
     <script>
@@ -126,6 +255,41 @@
         const sectionsWrapper = document.getElementById('sections-wrapper');
         const loader = document.getElementById('loader');
         const logosStatus = document.getElementById('logos-status');
+        let loadedWorkbooks = {};
+        const loadedFiles = new Map();
+        const status = document.getElementById('app-status');
+        const setStatus = (message, type = '') => { status.textContent = message; status.className = 'status-message ' + type; };
+        const readWhatsapp = () => {
+            const inputs = ['whatsapp-current', 'whatsapp-previous'].map(id => document.getElementById(id));
+            if (inputs.some(input => !input.checkValidity())) {
+                inputs.find(input => !input.checkValidity()).reportValidity();
+                throw new Error('Inserisci per WhatsApp numeri interi maggiori o uguali a zero.');
+            }
+            return { current: Number(inputs[0].value) || 0, previous: Number(inputs[1].value) || 0 };
+        };
+        const renderFileList = () => {
+            const list = document.getElementById('file-list');
+            list.replaceChildren();
+            loadedFiles.forEach((kind, name) => {
+                const row = document.createElement('li'); row.className = 'file-row';
+                const label = document.createElement('span'); label.textContent = name;
+                const badge = document.createElement('span'); badge.className = 'file-kind'; badge.textContent = kind;
+                row.append(label, badge); list.append(row);
+            });
+            document.getElementById('reset-report').hidden = loadedFiles.size === 0;
+        };
+        document.getElementById('open-guide').addEventListener('click', () => { document.getElementById('guida').open = true; });
+        dropZone.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fileInput.click(); } });
+        document.getElementById('reset-report').addEventListener('click', () => {
+            loadedWorkbooks = {}; loadedFiles.clear(); uploadedLogos = null; currentPlatformData = null;
+            fileInput.value = ''; logosStatus.style.display = 'none';
+            document.getElementById('whatsapp-current').value = ''; document.getElementById('whatsapp-previous').value = '';
+            buttonNav.replaceChildren(); sectionsWrapper.replaceChildren(); reportContent.classList.add('hidden');
+            document.getElementById('update-whatsapp').disabled = true;
+            renderFileList(); setStatus('Pronto per un nuovo report. Carica Fans globale e Competitor.'); dropZone.focus();
+        });
+        document.getElementById('update-whatsapp').addEventListener('click', () => window.recalcWithWhatsapp());
+
 
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -134,7 +298,6 @@
             e.preventDefault();
             dropZone.classList.remove('dragover');
             if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
                 handleFiles(e.dataTransfer.files);
             }
         });
@@ -145,6 +308,10 @@
 
         async function handleFiles(files) {
             showLoader();
+            dropZone.setAttribute('aria-busy', 'true');
+            const issues = [];
+            try {
+            if (typeof XLSX === 'undefined' || typeof d3 === 'undefined') throw new Error('Librerie non disponibili. Verifica la connessione Internet e ricarica la pagina.');
             const excelFiles = [];
             
             for (const file of files) {
@@ -152,22 +319,25 @@
                     try {
                         const text = await file.text();
                         const json = JSON.parse(text);
+                        if (!json.logos || typeof json.logos !== 'object' || Array.isArray(json.logos)) throw new Error('Struttura loghi mancante');
+                        if (Object.values(json.logos).some(logo => !logo || typeof logo.base64 !== 'string' || !/^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml);base64,/i.test(logo.base64))) throw new Error('Usa immagini in base64');
                         if (json.logos) {
                             uploadedLogos = json.logos;
+                            loadedFiles.set(file.name, 'Loghi');
                             logosStatus.style.display = 'block';
-                            console.log("Loghi caricati:", uploadedLogos);
+
                             if (currentPlatformData) {
                                 createPlatformChart('#piattaforma-chart-container', currentPlatformData, 'FOLLOWERS PER PIATTAFORMA');
                             }
                         }
                     } catch (e) {
                         console.error("Errore lettura JSON loghi:", e);
-                        alert("Il file JSON dei loghi non è valido.");
+                        issues.push(`Il file ${file.name} non contiene loghi validi (immagini in base64).`);
                     }
                     continue; 
                 }
 
-                if (file.name.toLowerCase().includes('whatsapp') && (file.name.endsWith('.xlsx') || file.name.endsWith('.csv') || file.name.endsWith('.xls'))) {
+                if (file.name.toLowerCase().includes('whatsapp') && /\.(xlsx|csv|xls)$/i.test(file.name)) {
                     try {
                         const data = await file.arrayBuffer();
                         const wb = XLSX.read(data);
@@ -185,38 +355,48 @@
                             let numVal = r[1];
                             if (typeof numVal === 'string') numVal = parseInt(numVal.replace(/\./g, '').replace(/\s/g, ''), 10);
                             return { date: dateVal, val: numVal || 0 };
-                        }).sort((a,b) => a.date - b.date);
+                        }).filter(row => !isNaN(row.date.getTime()) && Number.isInteger(row.val) && row.val >= 0).sort((a,b) => a.date - b.date);
 
                         if (parsedRows.length >= 2) {
                             document.getElementById('whatsapp-previous').value = parsedRows[parsedRows.length - 2].val;
                             document.getElementById('whatsapp-current').value = parsedRows[parsedRows.length - 1].val;
-                        }
-                    } catch (e) { console.error("Errore lettura file Whatsapp", e); }
+                        } else { issues.push(`Il file ${file.name} richiede almeno due righe valide: data e iscritti.`); }
+                    } catch (e) { issues.push(`Impossibile leggere i dati WhatsApp da ${file.name}.`); }
                 }
                 
                 if (file.name.match(/\.(xlsx|xls|csv)$/i)) {
                     excelFiles.push(file);
-                }
+                } else { issues.push(`Formato non supportato: ${file.name}.`); }
             }
 
-            const whatsappCurrent = parseInt(document.getElementById('whatsapp-current').value, 10) || 0;
-            const whatsappPrevious = parseInt(document.getElementById('whatsapp-previous').value, 10) || 0;
-            const whatsappData = { current: whatsappCurrent, previous: whatsappPrevious };
+            const whatsappData = readWhatsapp();
 
             const fileData = {};
             for (const file of excelFiles) {
                 try {
                     const data = await file.arrayBuffer();
                     fileData[file.name] = XLSX.read(data);
+                    const sheets = fileData[file.name].SheetNames;
+                    loadedFiles.set(file.name, sheets.includes('Total community size') ? 'Fans globale' : sheets.includes('COMPETITORS') ? 'Competitor' : /whatsapp/i.test(file.name) ? 'WhatsApp' : /^annuale/i.test(file.name) ? 'Storico' : 'Excel / CSV');
                 } catch (error) {
-                    console.error(`Errore file ${file.name}:`, error);
+                    issues.push(`Impossibile leggere ${file.name}. Verifica che sia un file Excel o CSV valido.`);
                 }
             }
             
-            if (Object.keys(fileData).length > 0) {
-                processFiles(fileData, whatsappData);
+            // A newly loaded workbook replaces an older workbook of the same required role.
+            for (const [name, workbook] of Object.entries(fileData)) {
+                const role = workbook.SheetNames.includes('Total community size') ? 'Total community size' : workbook.SheetNames.includes('COMPETITORS') ? 'COMPETITORS' : null;
+                for (const oldName of Object.keys(loadedWorkbooks)) {
+                    if (role && oldName !== name && loadedWorkbooks[oldName].SheetNames.includes(role)) { delete loadedWorkbooks[oldName]; loadedFiles.delete(oldName); }
+                }
+                loadedWorkbooks[name] = workbook;
             }
-            hideLoader();
+            renderFileList();
+            if (Object.keys(loadedWorkbooks).length > 0) processFiles(loadedWorkbooks, whatsappData);
+            else if (!issues.length) setStatus('Loghi caricati. Aggiungi Fans globale e Competitor per generare il report.');
+            if (issues.length) setStatus(issues.join(' '), 'error');
+            } catch (error) { setStatus(error.message || 'Elaborazione non riuscita. Verifica i file e riprova.', 'error'); }
+            finally { hideLoader(); dropZone.removeAttribute('aria-busy'); fileInput.value = ''; }
         }
         
         function getSheetData(workbook, sheetName) {
@@ -413,11 +593,19 @@
         function showFeedbackOnCopyButton(button, message) { const originalContent = button.innerHTML; button.innerHTML = message; setTimeout(() => { button.innerHTML = originalContent; }, 1500); }
 
         function processFiles(fileData, whatsappData) {
+            reportContent.classList.add('hidden');
+            document.getElementById('update-whatsapp').disabled = true;
             const fansGlobaleWorkbook = Object.values(fileData).find(wb => wb.SheetNames.includes('Total community size'));
             const competitorWorkbook = Object.values(fileData).find(wb => wb.SheetNames.includes('COMPETITORS'));
 
             if (!fansGlobaleWorkbook || !competitorWorkbook) {
-                alert("Assicurati di caricare 'Report - Fans globale' e 'Competitor'.");
+                setStatus('File acquisiti. Aggiungi ' + (!fansGlobaleWorkbook ? 'il report Fans globale (foglio “Total community size”)' : 'il file Competitor (foglio “COMPETITORS”)') + ' per generare il report.');
+                return;
+            }
+            const requiredSheets = ['Total community size', 'Fans Poste per piattaforma', 'Fans Poste Crescita', 'FB Followers', 'IG followers', 'X followers'];
+            const missingSheets = requiredSheets.filter(name => !fansGlobaleWorkbook.SheetNames.includes(name));
+            if (missingSheets.length) {
+                setStatus('Nel report Fans globale mancano i fogli: ' + missingSheets.join(', ') + '. Usa il modello originale.', 'error');
                 return;
             }
 
@@ -609,7 +797,7 @@
                     <div class="data-grid">
                         <div class="data-item"><h3>Dimensione totale community</h3><button class="copy-button" title="Copia valore"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button><p class="data-value" data-copy-target>${formatTotalCommunity(finalTotalCommunitySize)}</p></div>
                         <div class="data-item"><h3>Variazione vs Mese Prec.</h3><button class="copy-button" title="Copia valore"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button><p class="data-value ${String(relativeChange).includes('-') ? 'negative' : 'positive'}" data-copy-target>${String(relativeChange).replace('.', ',')}</p></div>
-                        <div class="data-item"><h3>Crescita Totale nel Mese</h3><button class="copy-button" title="Copia valore"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button><p class="data-value positive" data-copy-target>+${formatNumber(finalTotalGrowth)}</p></div>
+                        <div class="data-item"><h3>Crescita Totale nel Mese</h3><button class="copy-button" title="Copia valore"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3z"/></svg></button><p class="data-value ${finalTotalGrowth < 0 ? 'negative' : 'positive'}" data-copy-target>${finalTotalGrowth > 0 ? '+' : ''}${formatNumber(finalTotalGrowth)}</p></div>
                     </div>
                     <details style="background: #f8f9fc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 2rem;"><summary style="cursor: pointer; font-weight: 700; color: var(--primary-ui-blue); outline: none;">Visualizza tabella Crescita giornaliera</summary><div style="margin-top: 1rem;">${dailyGrowthTableHTML}</div></details>
                     
@@ -640,7 +828,7 @@
             for (const [id, section] of Object.entries(sections)) {
                 const button = document.createElement('button');
                 button.className = `nav-button ${isFirst ? 'active' : ''}`;
-                button.textContent = section.title; button.dataset.section = id;
+                button.textContent = section.title; button.dataset.section = id; button.setAttribute('aria-controls', id); button.setAttribute('aria-pressed', String(isFirst));
                 buttonNav.appendChild(button);
                 const sectionDiv = document.createElement('div');
                 sectionDiv.id = id; sectionDiv.className = `report-section ${!isFirst ? 'hidden' : ''}`;
@@ -675,18 +863,22 @@
 
             createPlatformChart('#piattaforma-chart-container', platformData, 'FOLLOWERS PER PIATTAFORMA');
             reportContent.classList.remove('hidden');
+            document.getElementById('update-whatsapp').disabled = false;
+            setStatus('Report pronto. Esplora le sezioni qui sotto oppure esporta i risultati.', 'success');
         }
 
         window.recalcWithWhatsapp = () => {
-            alert("Ricarica tutti i file per aggiornare correttamente i dati.");
+            try {
+                processFiles(loadedWorkbooks, readWhatsapp());
+            } catch (error) { setStatus(error.message || 'Impossibile aggiornare il report.', 'error'); }
         };
 
         buttonNav.addEventListener('click', (e) => {
             const clickedButton = e.target.closest('.nav-button');
             if (!clickedButton || clickedButton.classList.contains('exec-summary-btn')) return;
             const sectionId = clickedButton.dataset.section;
-            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-            clickedButton.classList.add('active');
+            buttonNav.querySelectorAll('[data-section]').forEach(btn => { btn.classList.remove('active'); btn.setAttribute('aria-pressed', 'false'); });
+            clickedButton.classList.add('active'); clickedButton.setAttribute('aria-pressed', 'true');
             document.querySelectorAll('.report-section').forEach(section => section.classList.toggle('hidden', section.id !== sectionId));
         });
 
@@ -708,7 +900,8 @@
                         textToCopy += rowText + '\n';
                     });
                 } else { textToCopy = target.innerText.trim(); }
-                navigator.clipboard.writeText(textToCopy).then(() => showFeedbackOnCopyButton(copyBtn, 'OK!')).catch(err => showFeedbackOnCopyButton(copyBtn, 'Err'));
+                if (!navigator.clipboard?.writeText) { setStatus('Il browser non consente la copia. Per i grafici usa Esporta SVG.', 'error'); return; }
+                navigator.clipboard.writeText(textToCopy).then(() => showFeedbackOnCopyButton(copyBtn, 'OK!')).catch(err => { showFeedbackOnCopyButton(copyBtn, 'Err'); setStatus('Copia non consentita dal browser. Verifica i permessi degli appunti.', 'error'); });
             } else if (exportBtn) {
                 const chartContainerId = exportBtn.dataset.chartId;
                 const svgElement = document.querySelector(`#${chartContainerId} svg`);
